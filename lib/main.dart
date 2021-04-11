@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
+import 'utils/utils.dart';
 import 'views/pages/pages.dart';
 
 void main() {
@@ -19,6 +20,12 @@ class MyApp extends StatelessWidget {
       child: GetMaterialApp(
         title: 'PDIL',
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          iconTheme: IconThemeData(
+            color: primaryColor,
+          ),
+        ),
         home: ImportPage(),
       ),
     );
