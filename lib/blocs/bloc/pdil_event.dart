@@ -3,8 +3,14 @@ part of 'pdil_bloc.dart';
 @immutable
 abstract class PdilEvent {}
 
-class UpdatePdil extends PdilEvent {
+class FetchPdil extends PdilEvent {
   final String idPel;
 
-  UpdatePdil(this.idPel);
+  FetchPdil(this.idPel);
+}
+
+class UpdatePdil extends PdilEvent {
+  final Pdil pdil;
+
+  UpdatePdil(this.pdil);
 }

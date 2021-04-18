@@ -16,3 +16,9 @@ class PdilError extends PdilState {
 
   PdilError(this.message);
 }
+
+class PdilOnUpdate extends PdilState {
+  final int count;
+
+  PdilOnUpdate(this.count);
+}

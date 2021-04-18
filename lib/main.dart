@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdil/blocs/blocs.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
+import 'package:pdil/services/navigation_helper.dart';
 
 import 'utils/utils.dart';
 import 'views/pages/pages.dart';
@@ -15,9 +13,15 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => PdilBloc(),
-      child: GetMaterialApp(
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => PdilBloc()),
+        BlocProvider(create: (_) => ErrorCheckBloc()),
+        BlocProvider(create: (_) => InputDataBloc()),
+        BlocProvider(create: (_) => ExportDataBloc()),
+      ],
+      child: MaterialApp(
+        navigatorKey: navigatorKey,
         title: 'PDIL',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
@@ -26,7 +30,7 @@ class MyApp extends StatelessWidget {
             color: primaryColor,
           ),
         ),
-        home: ImportPage(),
+        home: SplashScreen(),
       ),
     );
   }
