@@ -93,6 +93,12 @@ class DbHelper {
     return count;
   }
 
+  Future<int> deleteAll() async {
+    Database db = await this.database;
+    int count = await db.delete(tablePdil);
+    return count;
+  }
+
   Future<List<Pdil>> getPdilList() async {
     var pdilMapList = await select();
     int count = pdilMapList.length;

@@ -1,78 +1,100 @@
 part of 'pages.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
+  final bool isImport;
+
+  SettingsPage({this.isImport = false});
+
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Pengaturan", style: title24),
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: Stack(
-              children: [
-                ClipPath.shape(
-                  shape: CircleBorder(),
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    color: greenColor,
-                  ),
-                ),
-                SvgPicture.asset(
-                  "assets/icons/TextAa.svg",
-                  width: 18,
-                  height: 18,
-                ),
-              ],
-            ),
-            title: Text("Ukuran Font", style: subtitle16.copyWith(fontWeight: FontWeight.w600)),
-            subtitle:
-                Text("atur ukuran font sesuai dengan keinginan", style: title12.copyWith(fontWeight: FontWeight.w400)),
-            onTap: () {},
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: Divider(
-              thickness: 2,
-            ),
-          ),
-          ListTile(
-            leading: Stack(
-              children: [
-                Image.asset(
-                  "assets/images/ExportExcel.png",
-                  width: 30,
-                  height: 30,
-                ),
-              ],
-            ),
-            title: Text("Export Data Ke Excel", style: subtitle16.copyWith(color: redColor, fontWeight: FontWeight.w600)),
-            subtitle: RichText(
-              text: TextSpan(
-                text: "Tindakan",
-                style: title12.copyWith(fontWeight: FontWeight.w400),
+    setState(() {});
+    return BlocBuilder<FontSizeBloc, FontSizeState>(
+      builder: (_, stateFontSize) => (stateFontSize is FontSizeResult)
+          ? Scaffold(
+              appBar: AppBar(
+                title: Text("Pengaturan",
+                    style: stateFontSize.title.copyWith(color: whiteColor, fontWeight: FontWeight.w600)),
+              ),
+              body: ListView(
                 children: [
-                  TextSpan(
-                    text: " Export Data Ke Excel ",
-                    style: title12.copyWith(color: redColor, fontWeight: FontWeight.w400),
+                  ListTile(
+                    leading: Stack(
+                      children: [
+                        ClipPath.shape(
+                          shape: CircleBorder(),
+                          child: Container(
+                            width: 30,
+                            height: 30,
+                            color: greenColor,
+                          ),
+                        ),
+                        SvgPicture.asset(
+                          "assets/icons/TextAa.svg",
+                          width: 18,
+                          height: 18,
+                        ),
+                      ],
+                    ),
+                    title: Text("Ukuran Font", style: stateFontSize.subtitle.copyWith(fontWeight: FontWeight.w600)),
+                    subtitle: Text("atur ukuran font sesuai dengan keinginan", style: stateFontSize.body),
+                    onTap: () async {
+                      double value = await FontSizeServices.getFontSize() ?? 0;
+                      if (value != 0) {
+                        value = (value - 20) / 2;
+                      }
+                      NavigationHelper.to(MaterialPageRoute(builder: (_) => FontSizePage(sliderValue: value ?? 0)));
+                    },
                   ),
-                  TextSpan(text: "Akan menghapus data dari perangkat ("),
-                  TextSpan(
-                    text: "database",
-                    style: title12.copyWith(color: redColor, fontWeight: FontWeight.w400),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    child: Divider(
+                      thickness: 2,
+                    ),
                   ),
-                  TextSpan(text: ")"),
+                  if (!widget.isImport)
+                    ListTile(
+                      leading: Stack(
+                        children: [
+                          Image.asset(
+                            "assets/images/ExportExcel.png",
+                            width: 30,
+                            height: 30,
+                          ),
+                        ],
+                      ),
+                      title: Text("Export Data Ke Excel",
+                          style: stateFontSize.subtitle.copyWith(color: redColor, fontWeight: FontWeight.w600)),
+                      subtitle: RichText(
+                        text: TextSpan(
+                          text: "Tindakan",
+                          style: stateFontSize.body.copyWith(color: blackColor.withOpacity(0.6)),
+                          children: [
+                            TextSpan(
+                              text: " Export Data Ke Excel ",
+                              style: stateFontSize.body.copyWith(color: redColor),
+                            ),
+                            TextSpan(text: "Akan menghapus data dari perangkat ("),
+                            TextSpan(
+                              text: "database",
+                              style: stateFontSize.body.copyWith(color: redColor),
+                            ),
+                            TextSpan(text: ")"),
+                          ],
+                        ),
+                      ),
+                      onTap: () {
+                        NavigationHelper.to(MaterialPageRoute(builder: (_) => ExportPage()));
+                      },
+                    ),
                 ],
               ),
-            ),
-            onTap: () {
-              NavigationHelper.to(MaterialPageRoute(builder: (_) => ExportPage()));
-            },
-          ),
-        ],
-      ),
+            )
+          : Container(),
     );
   }
 }

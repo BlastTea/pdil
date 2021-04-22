@@ -17,11 +17,11 @@ class PdilBloc extends Bloc<PdilEvent, PdilState> {
       Pdil data = await dbHelper.selectWhere(event.idPel);
 
       if (data == null) {
-        yield PdilError("Data Tidak Ditemukan!!!");
+        yield PdilError("Data Tidak Ditemukan!!!", isContinuingSearch: event.isContinuingSearch);
       } else {
         yield PdilLoaded(data);
       }
-    } else if(event is UpdatePdil) {
+    } else if (event is UpdatePdil) {
       int count = await dbHelper.update(event.pdil);
 
       yield PdilOnUpdate(count);

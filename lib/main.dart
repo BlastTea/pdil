@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdil/blocs/blocs.dart';
 import 'package:pdil/services/navigation_helper.dart';
+import 'package:pdil/services/services.dart';
 
 import 'utils/utils.dart';
 import 'views/pages/pages.dart';
 
-void main() {
+void main() async {
   runApp(MyApp());
 }
 
@@ -19,6 +20,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => ErrorCheckBloc()),
         BlocProvider(create: (_) => InputDataBloc()),
         BlocProvider(create: (_) => ExportDataBloc()),
+        BlocProvider(create: (_) => FontSizeBloc()..add(FetchFontSize())),
+        BlocProvider(create: (_) => ImportBloc()..add(ImportCurrentImport())),
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,

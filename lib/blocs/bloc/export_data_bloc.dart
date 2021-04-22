@@ -9,10 +9,9 @@ class ExportDataBloc extends Bloc<ExportDataEvent, ExportDataState> {
 
   @override
   Stream<ExportDataState> mapEventToState(ExportDataEvent event) async* {
-    if(event is ExportDataExport) {
+    if (event is ExportDataExport) {
       double persentase = (event.row / event.maxRow) * 100;
       yield ExportDataProgress(int.parse(persentase.toString().split(".")[0]));
     }
   }
-  
 }

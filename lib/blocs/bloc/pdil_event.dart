@@ -5,8 +5,9 @@ abstract class PdilEvent {}
 
 class FetchPdil extends PdilEvent {
   final String idPel;
+  final bool isContinuingSearch;
 
-  FetchPdil(this.idPel);
+  FetchPdil(this.idPel, {this.isContinuingSearch = false});
 }
 
 class UpdatePdil extends PdilEvent {

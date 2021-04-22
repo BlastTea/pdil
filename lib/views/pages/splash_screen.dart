@@ -9,9 +9,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocProvider(
-        create: (_) => ImportBloc()..add(ImportCurrentImport()),
-        child: BlocBuilder<ImportBloc, ImportState>(
+      body: BlocBuilder<ImportBloc, ImportState>(
+        builder: (_, importState) => BlocBuilder<ImportBloc, ImportState>(
           builder: (_, state) {
             return FutureBuilder(
               future: Future(() async {
@@ -29,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
                 return Scaffold(
                   body: Center(
-                    child: Text("PDIL", style: title24.copyWith(color: primaryColor)),
+                    child: Text("PDIL", style: title.copyWith(color: primaryColor, fontWeight: FontWeight.w600)),
                   ),
                 );
               },

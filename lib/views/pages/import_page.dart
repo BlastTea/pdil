@@ -13,27 +13,40 @@ class _ImportPageState extends State<ImportPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Import",
-          style: title24,
-        ),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _importContainer(context),
-            _message(context, message),
-            _confirmToInput(context),
-          ],
-        ),
-      ),
+    return BlocBuilder<FontSizeBloc, FontSizeState>(
+      builder: (_, stateFontSize) => (stateFontSize is FontSizeResult)
+          ? Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  "Import",
+                  style: stateFontSize.title.copyWith(color: whiteColor, fontWeight: FontWeight.w600),
+                ),
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.settings, color: whiteColor),
+                    onPressed: () {
+                      NavigationHelper.to(MaterialPageRoute(builder: (_) => SettingsPage(isImport: true)));
+                    },
+                  ),
+                  SizedBox(width: 10),
+                ],
+              ),
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _importContainer(context, stateFontSize),
+                    _message(context, message, stateFontSize),
+                    _confirmToInput(context, stateFontSize),
+                  ],
+                ),
+              ),
+            )
+          : Container(),
     );
   }
 
-  _importContainer(BuildContext context) => Padding(
+  _importContainer(BuildContext context, FontSizeResult stateFontSize) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
           children: [
@@ -46,7 +59,7 @@ class _ImportPageState extends State<ImportPage> {
             ),
             Container(
               width: 60,
-              height: 45,
+              height: 40 + (stateFontSize.title.fontSize - 20),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
                 color: primaryColor,
@@ -114,6 +127,7 @@ class _ImportPageState extends State<ImportPage> {
                   child: Icon(
                     Icons.folder_open,
                     color: whiteColor,
+                    size: stateFontSize.title.fontSize + 4,
                   ),
                 ),
               ),
@@ -122,30 +136,31 @@ class _ImportPageState extends State<ImportPage> {
         ),
       );
 
-  _message(BuildContext context, String message) => BlocBuilder<ErrorCheckBloc, ErrorCheckState>(
+  _message(BuildContext context, String message, FontSizeResult stateFontSize) =>
+      BlocBuilder<ErrorCheckBloc, ErrorCheckState>(
         builder: (_, state) => (state is ErrorCheckResult)
             ? RichText(
                 text: TextSpan(
                   text: "Kolom tidak valid dengan format, silahkan edit :\n",
-                  style: title12.copyWith(color: redColor),
+                  style: stateFontSize.body.copyWith(color: redColor),
                   children: [
                     ...List.generate(
                       state.data.length ?? 0,
                       (index) => TextSpan(
                         text: "Kolom ",
-                        style: title12.copyWith(color: redColor),
+                        style: stateFontSize.body.copyWith(color: redColor),
                         children: [
                           TextSpan(
                             text: state.data[index].check,
-                            style: title12.copyWith(color: primaryColor),
+                            style: stateFontSize.body.copyWith(color: primaryColor),
                           ),
                           TextSpan(
                             text: " dengan ",
-                            style: title12.copyWith(color: redColor),
+                            style: stateFontSize.body.copyWith(color: redColor),
                           ),
                           TextSpan(
                             text: state.data[index].target + (index < state.data.length - 1 ? "\n" : ""),
-                            style: title12.copyWith(color: primaryColor),
+                            style: stateFontSize.body.copyWith(color: primaryColor),
                           )
                         ],
                       ),
@@ -154,11 +169,11 @@ class _ImportPageState extends State<ImportPage> {
                 ),
               )
             : (state is ErrorCheckSucessfulState)
-                ? Text("Kolom dan Data Valid!", style: title12.copyWith(color: greenColor))
+                ? Text("Kolom dan Data Valid!", style: stateFontSize.body.copyWith(color: greenColor))
                 : Container(),
       );
 
-  _confirmToInput(BuildContext context) {
+  _confirmToInput(BuildContext context, FontSizeResult stateFontSize) {
     return ElevatedButton(
       onPressed: () async {
         if (directory != "")
@@ -166,8 +181,9 @@ class _ImportPageState extends State<ImportPage> {
               useRootNavigator: true,
               context: context,
               builder: (_) => AlertDialog(
-                    title: Text("Apakah Anda yakin ?", style: title24.copyWith(color: blackColor)),
-                    content: Text("Tindakan ini tidak dapat di undo", style: title12),
+                    title: Text("Apakah Anda yakin ?",
+                        style: stateFontSize.title.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
+                    content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body),
                     actions: [
                       TextButton(
                         onPressed: () async {
@@ -176,7 +192,7 @@ class _ImportPageState extends State<ImportPage> {
                         },
                         child: Text(
                           "Ya",
-                          style: title12,
+                          style: stateFontSize.body,
                         ),
                       ),
                       TextButton(
@@ -185,7 +201,7 @@ class _ImportPageState extends State<ImportPage> {
                         },
                         child: Text(
                           "Tidak",
-                          style: title12,
+                          style: stateFontSize.body,
                         ),
                       ),
                     ],

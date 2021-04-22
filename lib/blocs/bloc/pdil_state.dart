@@ -13,8 +13,9 @@ class PdilLoaded extends PdilState {
 
 class PdilError extends PdilState {
   final String message;
+  final bool isContinuingSearch;
 
-  PdilError(this.message);
+  PdilError(this.message, {this.isContinuingSearch = false});
 }
 
 class PdilOnUpdate extends PdilState {

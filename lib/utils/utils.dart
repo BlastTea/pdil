@@ -5,31 +5,32 @@ import 'package:google_fonts/google_fonts.dart';
 TextStyle defaultStyle = GoogleFonts.poppins().copyWith();
 
 /// title 24 with black color default size 20
-TextStyle title24 = defaultStyle.copyWith(
+TextStyle title = defaultStyle.copyWith(
   fontSize: 20,
-  color: Colors.white,
-  fontWeight: FontWeight.w600,
 );
 
-TextStyle subtitle16 = defaultStyle.copyWith(
-  fontSize: 16,
+TextStyle subtitle = defaultStyle.copyWith(
+  fontSize: title.fontSize - 2,
 );
 
-TextStyle title12 = defaultStyle.copyWith(
-  fontSize: 12,
-  color: Colors.black,
-  fontWeight: FontWeight.w600,
+TextStyle body = defaultStyle.copyWith(
+  fontSize: subtitle.fontSize - 2,
 );
 
-showMySnackBar(BuildContext context, {
+const String loremIpsum =
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum at lobortis arcu, sed vulputate metus. Aliquam sodales dapibus erat, ut ultricies dolor imperdiet a. Fusce nec purus quis ipsum ultrices consectetur. Praesent quis risus tempor, vestibulum tellus id, euismod mauris. Vestibulum dapibus ullamcorper massa vel eleifend. Nulla sed ornare est. Quisque ullamcorper eu odio sit amet lobortis. Quisque vel eleifend diam, ac ornare augue. Sed eu dui eu velit malesuada tincidunt. Morbi quam risus, cursus non dictum id, maximus pulvinar enim.";
+
+showMySnackBar(
+  BuildContext context, {
   @required String text,
   Duration duration,
   Function onPressed,
-}) => ScaffoldMessenger.of(context).showSnackBar(
+}) =>
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           text,
-          style: title12.copyWith(color: whiteColor),
+          style: body.copyWith(color: whiteColor),
         ),
         duration: duration ?? Duration(seconds: 5),
         action: SnackBarAction(
