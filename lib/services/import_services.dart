@@ -1,7 +1,6 @@
 part of 'services.dart';
 
 class ImportServices {
-
   static SharedPreferences _sharedPref;
 
   static Future<bool> getCurrentImport() async {
@@ -22,5 +21,15 @@ class ImportServices {
   static Future<void> savePrefixIdpel(String idPel) async {
     _sharedPref = await SharedPreferences.getInstance();
     await _sharedPref.setString("idPel", idPel);
+  }
+
+  static Future<List<String>> getListFormat() async {
+    _sharedPref = await SharedPreferences.getInstance();
+    return _sharedPref.getStringList("format");
+  }
+
+  static Future<void> saveListFormat(List<String> format) async {
+    _sharedPref = await SharedPreferences.getInstance();
+    await _sharedPref.setStringList("format", format);
   }
 }

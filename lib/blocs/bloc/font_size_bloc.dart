@@ -22,7 +22,7 @@ class FontSizeBloc extends Bloc<FontSizeEvent, FontSizeState> {
         body: body.copyWith(fontSize: titleFontSize - 8),
       );
     } else if (event is SaveFontSize) {
-      await FontSizeServices.saveFontSize(event.fontSize);
+      FontSizeServices.saveFontSize(event.fontSize);
       yield FontSizeResult(
         title: title.copyWith(fontSize: event.fontSize),
         subtitle: subtitle.copyWith(fontSize: event.fontSize - 4),

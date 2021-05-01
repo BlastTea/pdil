@@ -12,6 +12,7 @@ class FetchPdil extends PdilEvent {
 
 class UpdatePdil extends PdilEvent {
   final Pdil pdil;
+  final bool isUsingSaveDialog;
 
-  UpdatePdil(this.pdil);
+  UpdatePdil(this.pdil, this.isUsingSaveDialog);
 }

@@ -24,7 +24,7 @@ class PdilBloc extends Bloc<PdilEvent, PdilState> {
     } else if (event is UpdatePdil) {
       int count = await dbHelper.update(event.pdil);
 
-      yield PdilOnUpdate(count);
+      yield PdilOnUpdate(count, event.isUsingSaveDialog);
     }
   }
 }

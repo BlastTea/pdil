@@ -24,7 +24,7 @@ class DbHelper {
     } catch (_) {}
 
     //create, read databases
-    var todoDatabase = openDatabase('pdil.db', version: 1, onCreate: _createDb);
+    var todoDatabase = openDatabase('pdil.db', version: 2, onCreate: _createDb);
 
     //mengembalikan nilai object sebagai hasil dari fungsinya
     return todoDatabase;
@@ -42,7 +42,9 @@ class DbHelper {
         $columnNoHp TEXT, 
         $columnNik TEXT, 
         $columnNpwp TEXT,
-        $columnIsKoreksi INTEGER
+        $columnCatatan TEXT,
+        $columnIsKoreksi INTEGER,
+        $columnTanggalBaca TEXT
       )
     ''');
   }

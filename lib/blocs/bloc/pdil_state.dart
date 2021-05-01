@@ -20,6 +20,7 @@ class PdilError extends PdilState {
 
 class PdilOnUpdate extends PdilState {
   final int count;
+  final bool isUsingSaveDialog;
 
-  PdilOnUpdate(this.count);
+  PdilOnUpdate(this.count, this.isUsingSaveDialog);
 }

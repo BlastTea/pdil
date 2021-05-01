@@ -1,8 +1,11 @@
 part of 'pages.dart';
 
 class ExportPage extends StatelessWidget {
-  final TextEditingController namaFileController = TextEditingController();
+  final bool isSimpan;
 
+  ExportPage(this.isSimpan);
+
+  final TextEditingController namaFileController = TextEditingController();
   final DbHelper dbHelper = DbHelper();
 
   Stopwatch stopwatchProgress = Stopwatch();
@@ -13,8 +16,8 @@ class ExportPage extends StatelessWidget {
       builder: (_, stateFontSize) => (stateFontSize is FontSizeResult)
           ? Scaffold(
               appBar: AppBar(
-                title:
-                    Text("Export", style: stateFontSize.title.copyWith(fontWeight: FontWeight.w600, color: whiteColor)),
+                title: Text(isSimpan ? "Simpan" : "Export",
+                    style: stateFontSize.title.copyWith(fontWeight: FontWeight.w600, color: whiteColor)),
               ),
               body: Stack(
                 children: [
@@ -30,7 +33,9 @@ class ExportPage extends StatelessWidget {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              if (namaFileController.text != "" && namaFileController.text != null)
+                              if (namaFileController.text != "" && namaFileController.text != null) if (isSimpan) {
+                                _exportData(context, namaFileController.text);
+                              } else
                                 showDialog(
                                     useRootNavigator: true,
                                     context: context,
@@ -67,7 +72,8 @@ class ExportPage extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text("Export ke Excel"),
+                                Text("${isSimpan ? 'Simpan' : 'Export'} ke Excel",
+                                    style: stateFontSize.body.copyWith(color: whiteColor)),
                                 SizedBox(width: 10),
                                 Transform.rotate(
                                   angle: pi,
@@ -147,15 +153,17 @@ class ExportPage extends StatelessWidget {
       pdils.forEach((row) {
         if (counter < 1) {
           sheet.appendRow([
-            'NO',
+            'NOMOR',
             'IDPEL',
             'NAMA',
             'ALAMAT',
             'TARIF',
             'DAYA',
-            'NO HP',
+            'NOHP',
             'NIK',
             'NPWP',
+            'CATATAN',
+            'TANGGALBACA',
           ]);
         }
         counter++;
@@ -177,7 +185,11 @@ class ExportPage extends StatelessWidget {
         file.writeAsBytesSync(value);
       });
     } catch (_) {} finally {
-      context.read<ImportBloc>().add(ImportConfirm(false));
+      if (isSimpan) {
+        showMySnackBar(context, text: "Data Telah Di Simpan");
+      } else {
+        context.read<ImportBloc>().add(ImportConfirm(false));
+      }
     }
   }
 }

@@ -11,8 +11,10 @@ import 'package:pdil/models/models.dart';
 import 'package:pdil/services/navigation_helper.dart';
 import 'package:pdil/services/services.dart';
 import 'package:pdil/utils/utils.dart';
+import 'package:pdil/views/animations/animations.dart';
 import 'package:pdil/views/widgets/widgets.dart';
 import 'package:excel/excel.dart';
+import 'package:indent/indent.dart';
 
 import '../../utils/utils.dart';
 
@@ -22,3 +24,5 @@ part 'splash_screen.dart';
 part 'settings_page.dart';
 part 'export_page.dart';
 part 'font_size_page.dart';
+part 'format_page.dart';
+part 'edit_format_page.dart';

@@ -49,7 +49,9 @@ const String columnDaya = 'Daya';
 const String columnNoHp = 'NoHp';
 const String columnNik = 'Nik';
 const String columnNpwp = 'Npwp';
+const String columnCatatan = 'Catatan';
 const String columnIsKoreksi = 'Koreksi';
+const String columnTanggalBaca = 'TanggalBaca';
 
 const Color primaryColor = Color(0xFF3090B3);
 const Color whiteColor = Color(0xFFFFFFFF);
@@ -57,3 +59,33 @@ const Color redColor = Color(0xFFFF0000);
 const Color greenColor = Color(0xFF42CF47);
 const Color blackColor = Color(0xFF000000);
 const Color greyColor = Color(0xFFC4C4C4);
+const Color yellowColor = Color(0xFFF2F542);
+
+const shimmerGradient = LinearGradient(
+  colors: [
+    Colors.transparent,
+    Color(0xFFF4F4F4),
+    Colors.transparent,
+  ],
+  stops: [
+    0.1,
+    0.3,
+    0.4,
+  ],
+  begin: Alignment(-1.0, -0.3),
+  end: Alignment(1.0, 0.3),
+  tileMode: TileMode.clamp,
+);
+
+String currentTime() {
+  DateTime time = DateTime.now();
+
+  int tanggal = time.day;
+  int bulan = time.month;
+  int tahun = time.year;
+
+  int jam = time.hour;
+  int minute = time.minute;
+
+  return '$tanggal/$bulan/$tahun $jam:$minute';
+}

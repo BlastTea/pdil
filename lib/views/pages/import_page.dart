@@ -10,6 +10,20 @@ class _ImportPageState extends State<ImportPage> {
   String directory = "";
   String message;
   DbHelper dbHelper = DbHelper();
+  final List<List<String>> formatChecks = [
+    ['IDPEL'],
+    ['NAMA'],
+    ['ALAMAT'],
+    ['TARIF', 'TARIP'],
+    ['DAYA'],
+    ['NOHP'],
+    ['NIK'],
+    ['NPWP'],
+    ['CATATAN'],
+    ['TANGGALBACA']
+  ];
+
+  List<int> formatIndexs = [];
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +226,7 @@ class _ImportPageState extends State<ImportPage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("Selanjutnya"),
+          Text("Proses", style: stateFontSize.body.copyWith(color: whiteColor)),
           SizedBox(width: 10),
           Transform.rotate(
             angle: pi,
@@ -236,22 +250,40 @@ class _ImportPageState extends State<ImportPage> {
 
     for (var table in excel.tables.keys) {
       for (var row in excel.tables[table].rows) {
+        print("pdil Row : $row");
         Pdil pdilExcel;
         if (counter > 0 && counter < 2) {
           context.read<ImportBloc>().add(ImportConfirm(true, prefixIdPel: row[1].toString().substring(0, 5)));
         }
         if (counter > 0) {
           pdilExcel = Pdil(
-            idPel: row[1].toString(),
-            nama: row[3].toString(),
-            alamat: row[4].toString(),
-            tarip: row[5].toString(),
-            daya: row[6].toString().split(".")[0],
+            idPel: row[formatIndexs[0]].toString(),
+            nama: row[formatIndexs[1]].toString(),
+            alamat: row[formatIndexs[2]].toString(),
+            tarip: row[formatIndexs[3]].toString(),
+            daya: row[formatIndexs[4]].toString().split(".")[0],
+            noHp: formatIndexs.length == 10 ? row[formatIndexs[5]] : null,
+            nik: formatIndexs.length == 10 ? row[formatIndexs[6]] : null,
+            npwp: formatIndexs.length == 10 ? row[formatIndexs[7]] : null,
+            catatan: formatIndexs.length == 10 ? row[formatIndexs[8]] : null,
+            tanggalBaca: formatIndexs.length == 10 ? row[formatIndexs[9]] : null,
             isKoreksi: false,
           );
           context.read<InputDataBloc>().add(
                 InputDataAdd(pdilExcel, counter + 1, excel.tables[table].maxRows),
               );
+        } else if (counter < 1) {
+          for (int i = 0; i < row.length; i++) {
+            formatChecksLoop:
+            for (int j = 0; j < formatChecks.length; j++) {
+              for (int k = 0; k < formatChecks[j].length; k++) {
+                if (row[i] == formatChecks[j][k]) {
+                  formatIndexs.add(i);
+                  break formatChecksLoop;
+                }
+              }
+            }
+          }
         }
         counter++;
       }

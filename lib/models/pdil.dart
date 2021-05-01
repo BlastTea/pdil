@@ -9,7 +9,9 @@ class Pdil {
   String noHp;
   String nik;
   String npwp;
+  String catatan;
   bool isKoreksi;
+  String tanggalBaca;
 
   Pdil({
     this.idPel,
@@ -20,7 +22,9 @@ class Pdil {
     this.noHp,
     this.nik,
     this.npwp,
+    this.catatan,
     this.isKoreksi,
+    this.tanggalBaca,
   });
 
   Map<String, dynamic> toMap() {
@@ -33,7 +37,9 @@ class Pdil {
       columnNoHp: noHp,
       columnNik: nik,
       columnNpwp: npwp,
+      columnCatatan: catatan,
       columnIsKoreksi: isKoreksi == true ? 1 : 0,
+      columnTanggalBaca: tanggalBaca,
     };
     return map;
   }
@@ -47,19 +53,23 @@ class Pdil {
     noHp = map[columnNoHp];
     nik = map[columnNik];
     npwp = map[columnNpwp];
+    catatan = map[columnCatatan];
     isKoreksi = map[columnIsKoreksi] == 1;
+    tanggalBaca = map[columnTanggalBaca];
   }
 
   List<String> toList() => [
-    idPel,
-    nama,
-    alamat,
-    tarip,
-    daya,
-    noHp,
-    nik,
-    npwp,
-  ];
+        idPel,
+        nama,
+        alamat,
+        tarip,
+        daya,
+        noHp,
+        nik,
+        npwp,
+        catatan,
+        tanggalBaca,
+      ];
 
   Pdil copyWith({
     String idPel,
@@ -70,16 +80,21 @@ class Pdil {
     String noHp,
     String nik,
     String npwp,
+    String catatan,
     bool isKoreksi,
-  }) => Pdil(
-    idPel: idPel ?? this.idPel,
-    nama: nama ?? this.nama,
-    alamat: alamat ?? this.alamat,
-    tarip: tarip ?? this.tarip,
-    daya: daya ?? this.daya,
-    noHp: noHp ?? this.noHp,
-    nik: nik ?? this.nik,
-    npwp: npwp ?? this.npwp,
-    isKoreksi: isKoreksi ?? this.isKoreksi,
-  );
+    String tanggalBaca,
+  }) =>
+      Pdil(
+        idPel: idPel ?? this.idPel,
+        nama: nama ?? this.nama,
+        alamat: alamat ?? this.alamat,
+        tarip: tarip ?? this.tarip,
+        daya: daya ?? this.daya,
+        noHp: noHp ?? this.noHp,
+        nik: nik ?? this.nik,
+        npwp: npwp ?? this.npwp,
+        catatan: catatan ?? this.catatan,
+        isKoreksi: isKoreksi ?? this.isKoreksi,
+        tanggalBaca: tanggalBaca ?? this.tanggalBaca,
+      );
 }
