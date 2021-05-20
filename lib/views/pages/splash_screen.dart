@@ -24,7 +24,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           if (state is ImportNotImported) {
                             return ImportPage();
                           } else if (state is ImportImported) {
-                            return InputPage(key: PageStorageKey<Changing>(null));
+                            return HomePage();
+                            // return InputPage(key: PageStorageKey<Changing>(null));
                           }
                         }
 

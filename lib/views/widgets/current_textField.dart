@@ -1,9 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pdil/blocs/blocs.dart';
-
-import '../../utils/utils.dart';
+part of 'widgets.dart';
 
 class CurrentTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -23,6 +18,7 @@ class CurrentTextField extends StatefulWidget {
   final int maxLines;
   final int minLines;
   final EdgeInsetsGeometry padding;
+  final Widget prefixIcon;
 
   CurrentTextField({
     this.controller,
@@ -42,6 +38,7 @@ class CurrentTextField extends StatefulWidget {
     this.maxLines = 1,
     this.minLines,
     this.padding,
+    this.prefixIcon,
   });
 
   @override
@@ -74,27 +71,24 @@ class _CurrentTextFieldState extends State<CurrentTextField> {
                 decoration: InputDecoration(
                   contentPadding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 10),
                   prefixText: widget.prefixText,
-                  prefixStyle: stateFontSize.body.copyWith(
-                    color: blackColor.withOpacity(0.6),
-                  ),
+                  prefixStyle: stateFontSize.body,
+                  prefixIcon: widget.prefixIcon,
                   labelText: widget.label,
-                  labelStyle: stateFontSize.subtitle.copyWith(
-                    color: primaryColor,
-                  ),
+                  labelStyle: stateFontSize.subtitle,
                   hintText: widget.hintText,
                   hintStyle: stateFontSize.body.copyWith(color: greyColor),
-                  disabledBorder: OutlineInputBorder(
-                    borderRadius: widget.borderRadius ?? BorderRadius.circular(5),
-                    borderSide: BorderSide(
-                      color: primaryColor,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: widget.borderRadius ?? BorderRadius.circular(5),
-                    borderSide: BorderSide(
-                      color: primaryColor,
-                    ),
-                  ),
+                  // disabledBorder: OutlineInputBorder(
+                  //   borderRadius: widget.borderRadius ?? BorderRadius.circular(5),
+                  //   borderSide: BorderSide(
+                  //     color: primaryColor,
+                  //   ),
+                  // ),
+                  // enabledBorder: OutlineInputBorder(
+                  //   borderRadius: widget.borderRadius ?? BorderRadius.circular(5),
+                  //   borderSide: BorderSide(
+                  //     color: primaryColor,
+                  //   ),
+                  // ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: widget.borderRadius ?? BorderRadius.circular(5),
                     borderSide: BorderSide(

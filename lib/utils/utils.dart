@@ -53,13 +53,14 @@ const String columnCatatan = 'Catatan';
 const String columnIsKoreksi = 'Koreksi';
 const String columnTanggalBaca = 'TanggalBaca';
 
-const Color primaryColor = Color(0xFF3090B3);
+const Color primaryColor = Color(0xFF5AC4FF);
 const Color whiteColor = Color(0xFFFFFFFF);
 const Color redColor = Color(0xFFFF0000);
 const Color greenColor = Color(0xFF42CF47);
 const Color blackColor = Color(0xFF000000);
 const Color greyColor = Color(0xFFC4C4C4);
 const Color yellowColor = Color(0xFFF2F542);
+const Color purpleColor = Colors.purple;
 
 const shimmerGradient = LinearGradient(
   colors: [

@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
         title: 'PDIL',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
+          scaffoldBackgroundColor: Color(0xFFF1F5FF),
           primaryColor: primaryColor,
           iconTheme: IconThemeData(
             color: primaryColor,

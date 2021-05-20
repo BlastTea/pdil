@@ -26,3 +26,4 @@ part 'export_page.dart';
 part 'font_size_page.dart';
 part 'format_page.dart';
 part 'edit_format_page.dart';
+part 'home_page.dart';
