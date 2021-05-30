@@ -10,7 +10,7 @@ class FontSizePage extends StatefulWidget {
 }
 
 class _FontSizePageState extends State<FontSizePage> {
-  double defaultValue = 20;
+  double defaultValue = 24;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class _FontSizePageState extends State<FontSizePage> {
                             children: [
                               TextSpan(
                                 text: " Geser Slider ke kanan",
-                                style: stateFontSize.body.copyWith(color: blackColor),
+                                style: stateFontSize.body1.copyWith(color: blackColor),
                               ),
                             ],
                           ),
@@ -49,7 +49,7 @@ class _FontSizePageState extends State<FontSizePage> {
                             children: [
                               TextSpan(
                                 text: " Geser Slider ke kiri",
-                                style: stateFontSize.body.copyWith(color: blackColor),
+                                style: stateFontSize.body1.copyWith(color: blackColor),
                               ),
                             ],
                           ),
@@ -72,7 +72,7 @@ class _FontSizePageState extends State<FontSizePage> {
                               shape: BoxShape.circle,
                             ),
                           ),
-                          Text('A', style: body.copyWith(fontWeight: FontWeight.bold)),
+                          Text('A', style: body1.copyWith(fontWeight: FontWeight.bold)),
                         ],
                       ),
                       Expanded(

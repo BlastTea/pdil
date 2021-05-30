@@ -5,11 +5,19 @@ class ImportPage extends StatefulWidget {
   _ImportPageState createState() => _ImportPageState();
 }
 
-class _ImportPageState extends State<ImportPage> {
+class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateMixin {
+  AnimationController _animationController;
+
+  Animation<Offset> _animation;
+
+  bool _isPasca = true;
+
+  DateTime _currentBackPressTime;
+
   FilePickerResult result;
   String directory = "";
   String message;
-  DbHelper dbHelper = DbHelper();
+  DbPasca dbHelper = DbPasca();
   final List<List<String>> formatChecks = [
     ['IDPEL'],
     ['NAMA'],
@@ -26,39 +34,226 @@ class _ImportPageState extends State<ImportPage> {
   List<int> formatIndexs = [];
 
   @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _animation = Tween<Offset>(begin: Offset(0.0, 1.0), end: Offset(0.0, 0.0)).animate(_animationController);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _animationController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.reverse();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FontSizeBloc, FontSizeState>(
-      builder: (_, stateFontSize) => (stateFontSize is FontSizeResult)
-          ? Scaffold(
-              appBar: AppBar(
-                title: Text(
-                  "Import",
-                  style: stateFontSize.title.copyWith(color: whiteColor, fontWeight: FontWeight.w600),
-                ),
-                actions: [
-                  IconButton(
-                    icon: Icon(Icons.settings, color: whiteColor),
-                    onPressed: () {
-                      NavigationHelper.to(MaterialPageRoute(builder: (_) => SettingsPage(isImport: true)));
-                    },
+    return WillPopScope(
+      onWillPop: () async {
+        Import currentImport = await ImportServices.getCurrentImport();
+        DateTime now = DateTime.now();
+        if (currentImport == Import.bothNotImported) {
+          if (_currentBackPressTime == null || now.difference(_currentBackPressTime) > Duration(seconds: 2)) {
+            _currentBackPressTime = now;
+            Fluttertoast.showToast(
+              msg: 'Tekan sekali lagi untuk keluar',
+            );
+            return Future.value(false);
+          } else if (_currentBackPressTime == null || now.difference(_currentBackPressTime) < Duration(seconds: 2)) {
+            SystemNavigator.pop();
+            return Future.value(true);
+          }
+          return Future.value(false);
+        }
+        return Future.value(true);
+      },
+      child: BlocBuilder<FontSizeBloc, FontSizeState>(
+        builder: (_, stateFontSize) {
+          if (stateFontSize is FontSizeResult) {
+            return AnimatedBuilder(
+              animation: _animationController,
+              builder: (_, child) {
+                return SlideTransition(
+                  position: _animation,
+                  child: child,
+                );
+              },
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: ClipPath(
+                  clipper: ImportClipper(),
+                  child: Container(
+                    width: double.infinity,
+                    color: whiteColor,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _circleOpenFolder(context),
+                          SizedBox(height: 5),
+                          MyToggleButton((_isPasca) {
+                            if (!_isPasca) {
+                              this._isPasca = _isPasca;
+                              formatChecks.insert(1, ['NO METER']);
+                            }
+                          }),
+                          SizedBox(height: 8),
+                          Material(
+                            child: CurrentTextField(
+                              controller: TextEditingController(text: directory),
+                              label: 'Nama File',
+                              readOnly: true,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          _prosesButton(context, stateFontSize),
+                          SizedBox(height: 17),
+                        ],
+                      ),
+                    ),
                   ),
-                  SizedBox(width: 10),
-                ],
-              ),
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _importContainer(context, stateFontSize),
-                    _message(context, message, stateFontSize),
-                    _confirmToInput(context, stateFontSize),
-                  ],
                 ),
               ),
-            )
-          : Container(),
+            );
+          }
+          return Container();
+        },
+      ),
     );
   }
+
+  _circleOpenFolder(BuildContext context) => Container(
+        width: 74,
+        height: 74,
+        decoration: BoxDecoration(
+          color: primaryColor,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: blackColor.withOpacity(0.25),
+              offset: Offset(0, 4),
+              blurRadius: 4,
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(74 / 2),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(74 / 2),
+            hoverColor: inkWellSplashColor.withOpacity(0.5),
+            splashColor: inkWellSplashColor,
+            onTap: () {
+              _pickFile(context);
+            },
+            child: Icon(
+              Icons.folder_open,
+              color: whiteColor,
+              size: 30,
+            ),
+          ),
+        ),
+      );
+
+  _prosesButton(BuildContext context, FontSizeResult stateFontSize) => CurrentTextButton(
+        text: 'Proses',
+        onTap: () {
+          if (directory != "")
+            showDialog(
+                barrierDismissible: false,
+                useRootNavigator: true,
+                context: context,
+                builder: (_) => AlertDialog(
+                      title: Text("Apakah Anda yakin ?",
+                          style: stateFontSize.title.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
+                      content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
+                      actions: [
+                        TextButton(
+                          onPressed: () async {
+                            NavigationHelper.back();
+                            _loadingScreen(context, stateFontSize);
+                            _inputDataToDatabase(context);
+                          },
+                          child: Text(
+                            "Ya",
+                            style: stateFontSize.body1,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            NavigationHelper.back();
+                          },
+                          child: Text(
+                            "Tidak",
+                            style: stateFontSize.body1,
+                          ),
+                        ),
+                      ],
+                    ));
+          else
+            Fluttertoast.showToast(msg: 'Silahkan pilih file terlebih dahulu');
+        },
+      );
+
+  _loadingScreen(BuildContext context, FontSizeResult stateFontSize) => NavigationHelper.to(
+        PageRouteBuilder(
+          barrierColor: blackColor.withOpacity(0.5),
+          barrierDismissible: false,
+          opaque: false,
+          pageBuilder: (_, __, ___) => AlertDialog(
+            content: BlocBuilder<InputDataBloc, InputDataState>(
+              builder: (_, inputDataState) {
+                if (inputDataState is InputDataProgress) {
+                  int persentase = int.parse((inputDataState.progress * 100).toString().split(".")[0]);
+                  if (persentase == 100) {
+                    Future.delayed(Duration(milliseconds: 500)).then((value) {
+                      NavigationHelper.back();
+                      NavigationHelper.back();
+                    });
+                  }
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 2,
+                        height: 6,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 500),
+                          width: MediaQuery.of(context).size.width / 2 * inputDataState.progress,
+                          height: 6,
+                          color: inputDataState.progress < 0.5
+                              ? redColor
+                              : inputDataState.progress < 0.7
+                                  ? yellowColor
+                                  : greenColor,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          Text('${int.parse((inputDataState.progress * 100).toString().split(".")[0])}%',
+                              style: stateFontSize.body2),
+                        ],
+                      ),
+                    ],
+                  );
+                }
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
 
   _importContainer(BuildContext context, FontSizeResult stateFontSize) => Padding(
         padding: const EdgeInsets.all(8.0),
@@ -101,41 +296,6 @@ class _ImportPageState extends State<ImportPage> {
                       setState(() {
                         directory = files[files.length - 1];
                       });
-
-                      // var file = result.files.single.path;
-                      // var bytes = File(file).readAsBytesSync();
-                      // var excel = Excel.decodeBytes(bytes);
-
-                      // for (var table in excel.tables.keys) {
-                      // print(table); //sheet Name
-                      // print(excel.tables[table].maxCols);
-                      // print(excel.tables[table].maxRows);
-                      // for (var row in excel.tables[table].rows) {
-                      //   print("$row");
-                      // }
-                      //
-                      //
-                      // check
-                      // for (int i = 0; i < check.length; i++) {
-                      //   List columns = excel.tables[table].rows[0];
-                      //   if (check[i] == columns[i]) {
-                      //     if (i == check.length - 1) {
-                      //       context
-                      //           .read<ErrorCheckBloc>()
-                      //           .add(ErrorCheckSuccessfulEvent());
-                      //       isChecked = true;
-                      //     }
-                      //   } else {
-                      //     isChecked = false;
-                      //     context.read<ErrorCheckBloc>().add(
-                      //         ErrorCheckOnError(ErrorCheck(
-                      //             check: columns[i], target: check[i])));
-                      //     if (i == check.length - 1) {
-                      //       return;
-                      //     }
-                      //   }
-                      // }
-                      // }
                     }
                   },
                   child: Icon(
@@ -156,25 +316,25 @@ class _ImportPageState extends State<ImportPage> {
             ? RichText(
                 text: TextSpan(
                   text: "Kolom tidak valid dengan format, silahkan edit :\n",
-                  style: stateFontSize.body.copyWith(color: redColor),
+                  style: stateFontSize.body1.copyWith(color: redColor),
                   children: [
                     ...List.generate(
                       state.data.length ?? 0,
                       (index) => TextSpan(
                         text: "Kolom ",
-                        style: stateFontSize.body.copyWith(color: redColor),
+                        style: stateFontSize.body1.copyWith(color: redColor),
                         children: [
                           TextSpan(
                             text: state.data[index].check,
-                            style: stateFontSize.body.copyWith(color: primaryColor),
+                            style: stateFontSize.body1.copyWith(color: primaryColor),
                           ),
                           TextSpan(
                             text: " dengan ",
-                            style: stateFontSize.body.copyWith(color: redColor),
+                            style: stateFontSize.body1.copyWith(color: redColor),
                           ),
                           TextSpan(
                             text: state.data[index].target + (index < state.data.length - 1 ? "\n" : ""),
-                            style: stateFontSize.body.copyWith(color: primaryColor),
+                            style: stateFontSize.body1.copyWith(color: primaryColor),
                           )
                         ],
                       ),
@@ -183,7 +343,7 @@ class _ImportPageState extends State<ImportPage> {
                 ),
               )
             : (state is ErrorCheckSucessfulState)
-                ? Text("Kolom dan Data Valid!", style: stateFontSize.body.copyWith(color: greenColor))
+                ? Text("Kolom dan Data Valid!", style: stateFontSize.body1.copyWith(color: greenColor))
                 : Container(),
       );
 
@@ -197,7 +357,7 @@ class _ImportPageState extends State<ImportPage> {
               builder: (_) => AlertDialog(
                     title: Text("Apakah Anda yakin ?",
                         style: stateFontSize.title.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
-                    content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body),
+                    content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
                     actions: [
                       TextButton(
                         onPressed: () async {
@@ -206,7 +366,7 @@ class _ImportPageState extends State<ImportPage> {
                         },
                         child: Text(
                           "Ya",
-                          style: stateFontSize.body,
+                          style: stateFontSize.body1,
                         ),
                       ),
                       TextButton(
@@ -215,7 +375,7 @@ class _ImportPageState extends State<ImportPage> {
                         },
                         child: Text(
                           "Tidak",
-                          style: stateFontSize.body,
+                          style: stateFontSize.body1,
                         ),
                       ),
                     ],
@@ -226,7 +386,7 @@ class _ImportPageState extends State<ImportPage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("Proses", style: stateFontSize.body.copyWith(color: whiteColor)),
+          Text("Proses", style: stateFontSize.body1.copyWith(color: whiteColor)),
           SizedBox(width: 10),
           Transform.rotate(
             angle: pi,
@@ -241,6 +401,26 @@ class _ImportPageState extends State<ImportPage> {
     );
   }
 
+  _pickFile(BuildContext context) async {
+    result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx', 'xltx'],
+      allowMultiple: false,
+    );
+
+    context.read<ErrorCheckBloc>().add(ErrorCheckClear());
+    setState(() {
+      directory = "";
+    });
+
+    if (result != null) {
+      List files = result.files.single.path.split("/");
+      setState(() {
+        directory = files[files.length - 1];
+      });
+    }
+  }
+
   _inputDataToDatabase(BuildContext context) async {
     var file = result.files.single.path;
     var bytes = File(file).readAsBytesSync();
@@ -253,7 +433,8 @@ class _ImportPageState extends State<ImportPage> {
         print("pdil Row : $row");
         Pdil pdilExcel;
         if (counter > 0 && counter < 2) {
-          context.read<ImportBloc>().add(ImportConfirm(true, prefixIdPel: row[1].toString().substring(0, 5)));
+          context.read<ImportBloc>().add(ImportConfirm(_isPasca ? Import.pascabayarImported : Import.prabayarImported,
+              prefixIdPel: row[1].toString().substring(0, 5)));
         }
         if (counter > 0) {
           pdilExcel = Pdil(
@@ -269,9 +450,12 @@ class _ImportPageState extends State<ImportPage> {
             tanggalBaca: formatIndexs.length == 10 ? row[formatIndexs[9]] : null,
             isKoreksi: false,
           );
-          context.read<InputDataBloc>().add(
-                InputDataAdd(pdilExcel, counter + 1, excel.tables[table].maxRows),
-              );
+          context.read<InputDataBloc>().add(InputDataAdd(
+                data: pdilExcel,
+                row: counter + 1,
+                maxRow: excel.tables[table].maxRows,
+                isPasca: _isPasca,
+              ));
         } else if (counter < 1) {
           for (int i = 0; i < row.length; i++) {
             formatChecksLoop:

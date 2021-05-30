@@ -3,14 +3,45 @@ part of 'services.dart';
 class ImportServices {
   static SharedPreferences _sharedPref;
 
-  static Future<bool> getCurrentImport() async {
+  static Future<Import> getCurrentImport() async {
     _sharedPref = await SharedPreferences.getInstance();
-    return _sharedPref.getBool("import");
+    String value = _sharedPref.getString("import");
+    switch (value) {
+      case 'both':
+        return Import.bothImported;
+        break;
+      case 'bothNotImported':
+        return Import.bothNotImported;
+        break;
+      case 'pascabayar':
+        return Import.pascabayarImported;
+        break;
+      case 'prabayar':
+        return Import.prabayarImported;
+        break;
+      default:
+        return Import.bothNotImported;
+    }
   }
 
-  static Future<void> saveImport(bool isImported) async {
+  static Future<void> saveImport(Import import) async {
     _sharedPref = await SharedPreferences.getInstance();
-    await _sharedPref.setBool("import", isImported);
+    String value;
+    switch (import) {
+      case Import.bothImported:
+        value = 'both';
+        break;
+      case Import.bothNotImported:
+        value = 'bothNotImported';
+        break;
+      case Import.pascabayarImported:
+        value = 'pascabayar';
+        break;
+      case Import.prabayarImported:
+        value = 'prabayar';
+        break;
+    }
+    await _sharedPref.setString("import", value);
   }
 
   static Future<String> getPrefixIdpel() async {

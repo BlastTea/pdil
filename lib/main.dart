@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdil/blocs/blocs.dart';
 import 'package:pdil/services/navigation_helper.dart';
@@ -9,6 +10,7 @@ import 'views/pages/pages.dart';
 
 void main() async {
   runApp(MyApp());
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 }
 
 class MyApp extends StatelessWidget {

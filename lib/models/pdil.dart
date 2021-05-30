@@ -2,6 +2,7 @@ part of 'models.dart';
 
 class Pdil {
   String idPel;
+  String noMeter;
   String nama;
   String alamat;
   String tarip;
@@ -9,12 +10,14 @@ class Pdil {
   String noHp;
   String nik;
   String npwp;
+  String email;
   String catatan;
   bool isKoreksi;
   String tanggalBaca;
 
   Pdil({
     this.idPel,
+    this.noMeter,
     this.nama,
     this.alamat,
     this.tarip,
@@ -22,6 +25,7 @@ class Pdil {
     this.noHp,
     this.nik,
     this.npwp,
+    this.email,
     this.catatan,
     this.isKoreksi,
     this.tanggalBaca,
@@ -30,6 +34,7 @@ class Pdil {
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
       columnIdPel: idPel,
+      columnNoMeter : noMeter,
       columnNama: nama,
       columnAlamat: alamat,
       columnTarip: tarip,
@@ -37,6 +42,7 @@ class Pdil {
       columnNoHp: noHp,
       columnNik: nik,
       columnNpwp: npwp,
+      columnEmail : email,
       columnCatatan: catatan,
       columnIsKoreksi: isKoreksi == true ? 1 : 0,
       columnTanggalBaca: tanggalBaca,
@@ -46,6 +52,7 @@ class Pdil {
 
   Pdil.fromMap(Map<String, dynamic> map) {
     idPel = map[columnIdPel];
+    noMeter = map[columnNoMeter];
     nama = map[columnNama];
     alamat = map[columnAlamat];
     tarip = map[columnTarip];
@@ -53,13 +60,15 @@ class Pdil {
     noHp = map[columnNoHp];
     nik = map[columnNik];
     npwp = map[columnNpwp];
+    email = map[columnEmail];
     catatan = map[columnCatatan];
     isKoreksi = map[columnIsKoreksi] == 1;
     tanggalBaca = map[columnTanggalBaca];
   }
 
-  List<String> toList() => [
+  List<String> toList({bool isPasca = true}) => [
         idPel,
+        if(!isPasca) noMeter,
         nama,
         alamat,
         tarip,
@@ -67,12 +76,14 @@ class Pdil {
         noHp,
         nik,
         npwp,
+        email,
         catatan,
         tanggalBaca,
       ];
 
   Pdil copyWith({
     String idPel,
+    String noMeter,
     String nama,
     String alamat,
     String tarip,
@@ -80,12 +91,14 @@ class Pdil {
     String noHp,
     String nik,
     String npwp,
+    String email,
     String catatan,
     bool isKoreksi,
     String tanggalBaca,
   }) =>
       Pdil(
         idPel: idPel ?? this.idPel,
+        noMeter: noMeter ?? this.noMeter,
         nama: nama ?? this.nama,
         alamat: alamat ?? this.alamat,
         tarip: tarip ?? this.tarip,
@@ -93,6 +106,7 @@ class Pdil {
         noHp: noHp ?? this.noHp,
         nik: nik ?? this.nik,
         npwp: npwp ?? this.npwp,
+        email: email ?? this.email,
         catatan: catatan ?? this.catatan,
         isKoreksi: isKoreksi ?? this.isKoreksi,
         tanggalBaca: tanggalBaca ?? this.tanggalBaca,

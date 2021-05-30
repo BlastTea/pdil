@@ -6,12 +6,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   int _currentNav = 1;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: _currentNav == 1
+          ? FloatingActionButton(
+              backgroundColor: primaryColor,
+              onPressed: () {},
+              child: Icon(Icons.save, color: whiteColor),
+            )
+          : null,
       bottomNavigationBar: ClippedBottomBar(
         items: [
           ClippedBottomBarItem(Icons.list_rounded),
@@ -27,7 +33,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: [
-          SettingsPage(),
+          CustomerDataPage(),
           InputPage(),
           SettingsPage(),
         ][_currentNav],

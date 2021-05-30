@@ -7,7 +7,7 @@ part 'pdil_event.dart';
 part 'pdil_state.dart';
 
 class PdilBloc extends Bloc<PdilEvent, PdilState> {
-  DbHelper dbHelper = DbHelper();
+  DbPasca dbHelper = DbPasca();
 
   PdilBloc() : super(PdilInitial());
 

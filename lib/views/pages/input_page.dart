@@ -9,10 +9,9 @@ class InputPage extends StatefulWidget {
 
 class _InputPageState extends State<InputPage> with SingleTickerProviderStateMixin {
   final List<TextEditingController> _controllers = List.generate(
-    8,
+    10,
     (index) => TextEditingController(),
   );
-  final TextEditingController _idPelController = TextEditingController();
 
   Pdil _currentPdil;
   Pdil _pdilBefore;
@@ -416,62 +415,16 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
   }
 
   _secondVersion(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      showModalBottomSheet(
-        backgroundColor: Colors.transparent,
-        context: context,
-        builder: (_) => ClipPath(
-          clipper: ImportClipper(),
-          child: Container(
-            width: double.infinity,
-            color: whiteColor,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Circle Open Folder
-                  Container(
-                    width: 74,
-                    height: 74,
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(74 / 2),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(74 / 2),
-                        hoverColor: purpleColor.withOpacity(0.5),
-                        splashColor: purpleColor,
-                        onTap: () {},
-                        child: Icon(
-                          Icons.folder_open,
-                          color: whiteColor,
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 5),
-                  MyToggleButton(),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    });
     return ListView(
       physics: BouncingScrollPhysics(),
       children: List.generate(
-        9,
+        10,
         (index) => Padding(
-          padding: const EdgeInsets.fromLTRB(25, 10, 25, 0),
+          padding: EdgeInsets.fromLTRB(defaultPadding, 10, defaultPadding, index == 9 ? 60 : 0),
           child: CurrentTextField(
+            controller: _controllers[index],
             width: MediaQuery.of(context).size.width - 110,
-            padding: index == 0 ? const EdgeInsets.fromLTRB(10, 24, 10, 0) : const EdgeInsets.symmetric(horizontal: 15),
+            padding: index == 0 ? const EdgeInsets.fromLTRB(10, 24, 10, 0) : index == 9 ? const EdgeInsets.all(15) : const EdgeInsets.symmetric(horizontal: 15),
             keyboardType: [
               TextInputType.number,
               TextInputType.text,
@@ -481,6 +434,7 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
               TextInputType.number,
               TextInputType.number,
               TextInputType.number,
+              TextInputType.emailAddress,
               TextInputType.text,
             ][index],
             label: [
@@ -492,12 +446,32 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
               'No Hp',
               'NIK',
               'NPWP',
+              'Email',
               'CATATAN',
             ][index],
+            readOnly: [
+              false,
+              true,
+              true,
+              true,
+              true,
+              true,
+              false,
+              false,
+              false,
+              false,
+              false,
+            ][index],
             prefixIcon: index == 0 ? Icon(Icons.people_alt) : null,
-            height: index == 8 ? 160 : null,
-            expands: index == 8,
-            maxLines: index == 8 ? null : 1,
+            height: index == 9 ? 160 : null,
+            expands: index == 9,
+            maxLines: index == 9 ? null : 1,
+            onCancelTap: index == 0
+                ? () {
+                    _controllers[index].text = '';
+                  }
+                : null,
+            onChanged: (value) {},
           ),
         ),
       ),
@@ -519,15 +493,6 @@ class ImportClipper extends CustomClipper<Path> {
       20,
       40,
     );
-    // path.lineTo(size.width / 2 - 60, 40);
-    // path.cubicTo(
-    //   size.width / 2 - 50,
-    //   40,
-    //   size.width / 2 - 60,
-    //   30,
-    //   size.width / 2 - 35,
-    //   25,
-    // );
     path.arcTo(Rect.fromLTWH(size.width / 2 - 41, 0, 82, 82), pi, pi, false);
     path.lineTo(size.width - 20, 40);
     path.cubicTo(
@@ -548,30 +513,5 @@ class ImportClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
     return false;
-  }
-}
-
-class MyToggleButton extends StatefulWidget {
-  @override
-  _MyToggleButtonState createState() => _MyToggleButtonState();
-}
-
-class _MyToggleButtonState extends State<MyToggleButton> {
-  List<bool> bools = [true, false];
-
-  @override
-  Widget build(BuildContext context) {
-    return ToggleButtons(
-      children: [
-        Text('Pascabayar'),
-        Text('Prabayar'),
-      ],
-      isSelected: bools,
-      onPressed: (index) {
-        setState(() {
-          bools[index] = !bools[index];
-        });
-      },
-    );
   }
 }

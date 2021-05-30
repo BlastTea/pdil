@@ -6,7 +6,7 @@ class ExportPage extends StatelessWidget {
   ExportPage(this.isSimpan);
 
   final TextEditingController namaFileController = TextEditingController();
-  final DbHelper dbHelper = DbHelper();
+  final DbPasca dbHelper = DbPasca();
 
   Stopwatch stopwatchProgress = Stopwatch();
 
@@ -43,7 +43,7 @@ class ExportPage extends StatelessWidget {
                                           title: Text("Apakah Anda yakin ?",
                                               style: stateFontSize.title
                                                   .copyWith(color: blackColor, fontWeight: FontWeight.w600)),
-                                          content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body),
+                                          content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
                                           actions: [
                                             TextButton(
                                               onPressed: () {
@@ -52,7 +52,7 @@ class ExportPage extends StatelessWidget {
                                               },
                                               child: Text(
                                                 "Ya",
-                                                style: stateFontSize.body,
+                                                style: stateFontSize.body1,
                                               ),
                                             ),
                                             TextButton(
@@ -61,7 +61,7 @@ class ExportPage extends StatelessWidget {
                                               },
                                               child: Text(
                                                 "Tidak",
-                                                style: stateFontSize.body,
+                                                style: stateFontSize.body1,
                                               ),
                                             ),
                                           ],
@@ -73,7 +73,7 @@ class ExportPage extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text("${isSimpan ? 'Simpan' : 'Export'} ke Excel",
-                                    style: stateFontSize.body.copyWith(color: whiteColor)),
+                                    style: stateFontSize.body1.copyWith(color: whiteColor)),
                                 SizedBox(width: 10),
                                 Transform.rotate(
                                   angle: pi,
@@ -167,7 +167,7 @@ class ExportPage extends StatelessWidget {
           ]);
         }
         counter++;
-        context.read<ExportDataBloc>().add(ExportDataExport(counter, pdils.length));
+        context.read<ExportDataBloc>().add(ExportDataExport(row: counter, maxRow: pdils.length, message: 'null'));
         var rows = [
           counter.toString(),
           ...row.toList(),
@@ -188,7 +188,8 @@ class ExportPage extends StatelessWidget {
       if (isSimpan) {
         showMySnackBar(context, text: "Data Telah Di Simpan");
       } else {
-        context.read<ImportBloc>().add(ImportConfirm(false));
+        /// untuk sementara [Import.bothNotImported]
+        context.read<ImportBloc>().add(ImportConfirm(Import.bothNotImported));
       }
     }
   }

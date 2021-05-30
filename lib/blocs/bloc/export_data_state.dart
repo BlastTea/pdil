@@ -6,7 +6,8 @@ class ExportDataState {}
 class ExportDataInitial extends ExportDataState {}
 
 class ExportDataProgress extends ExportDataState {
-  final int progress;
+  final double progress;
+  final String message;
 
-  ExportDataProgress(this.progress) : assert(progress <= 100);
+  ExportDataProgress(this.progress, this.message);
 }

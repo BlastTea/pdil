@@ -4,8 +4,13 @@ part of 'export_data_bloc.dart';
 class ExportDataEvent {}
 
 class ExportDataExport extends ExportDataEvent {
-  final row;
-  final maxRow;
+  final int row;
+  final int maxRow;
+  final String message;
 
-  ExportDataExport(this.row, this.maxRow);
+  ExportDataExport({
+    @required this.row,
+    @required this.maxRow,
+    @required this.message,
+  });
 }

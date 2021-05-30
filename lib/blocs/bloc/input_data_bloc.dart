@@ -12,7 +12,8 @@ part 'input_data_event.dart';
 part 'input_data_state.dart';
 
 class InputDataBloc extends Bloc<InputDataEvent, InputDataState> {
-  DbHelper dbHelper = DbHelper();
+  DbPasca dbPasca = DbPasca();
+  DbPra dbPra = DbPra();
 
   InputDataBloc() : super(InputDataInitial());
 
@@ -28,9 +29,13 @@ class InputDataBloc extends Bloc<InputDataEvent, InputDataState> {
       // print("pdil Excel nik : ${event.data.nik}");
       // print("pdil Excel npwp : ${event.data.npwp}");
 
-      double persentase = (event.row / event.maxRow) * 100;
-      await dbHelper.insert(event.data);
-      yield InputDataProgress(int.parse(persentase.toString().split(".")[0]));
+      double persentase = event.row / event.maxRow;
+      if (event.isPasca) {
+        await dbPasca.insert(event.data);
+      } else if(!event.isPasca) {
+        await dbPra.insert(event.data);
+      }
+      yield InputDataProgress(persentase);
     }
   }
 }

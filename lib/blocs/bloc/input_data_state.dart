@@ -4,9 +4,9 @@ part of 'input_data_bloc.dart';
 class InputDataState {}
 
 class InputDataProgress extends InputDataState {
-  final int progress;
+  final double progress;
 
-  InputDataProgress(this.progress) : assert(progress <= 100);
+  InputDataProgress(this.progress);
 }
 
 class InputDataInitial extends InputDataState {}

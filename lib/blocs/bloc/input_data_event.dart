@@ -7,6 +7,7 @@ class InputDataAdd extends InputDataEvent {
   final Pdil data;
   final int row;
   final maxRow;
+  final bool isPasca;
 
-  InputDataAdd(this.data, this.row, this.maxRow);
+  InputDataAdd({this.data, this.row, this.maxRow, this.isPasca});
 }

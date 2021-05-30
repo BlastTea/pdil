@@ -6,8 +6,8 @@ class ImportEvent {}
 class ImportCurrentImport extends ImportEvent {}
 
 class ImportConfirm extends ImportEvent {
-  final bool isConfirmed;
+  final Import import;
   final String prefixIdPel;
 
-  ImportConfirm(this.isConfirmed, {this.prefixIdPel});
+  ImportConfirm(this.import, {this.prefixIdPel});
 }

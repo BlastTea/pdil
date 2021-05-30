@@ -6,14 +6,18 @@ TextStyle defaultStyle = GoogleFonts.poppins().copyWith();
 
 /// title 24 with black color default size 20
 TextStyle title = defaultStyle.copyWith(
-  fontSize: 20,
+  fontSize: 24,
 );
 
 TextStyle subtitle = defaultStyle.copyWith(
-  fontSize: title.fontSize - 2,
+  fontSize: title.fontSize - 6,
 );
 
-TextStyle body = defaultStyle.copyWith(
+TextStyle body1 = defaultStyle.copyWith(
+  fontSize: subtitle.fontSize - 4,
+);
+
+TextStyle body2 = defaultStyle.copyWith(
   fontSize: subtitle.fontSize - 2,
 );
 
@@ -30,7 +34,7 @@ showMySnackBar(
       SnackBar(
         content: Text(
           text,
-          style: body.copyWith(color: whiteColor),
+          style: body1.copyWith(color: whiteColor),
         ),
         duration: duration ?? Duration(seconds: 5),
         action: SnackBarAction(
@@ -40,8 +44,10 @@ showMySnackBar(
       ),
     );
 
-const String tablePdil = 'Pdil';
+const String tablePascabayar = 'Pascabayar';
+const String tablePrabayar = 'Prabayar';
 const String columnIdPel = 'IdPel';
+const String columnNoMeter = 'NoMeter';
 const String columnNama = 'Nama';
 const String columnAlamat = 'Alamat';
 const String columnTarip = 'Tarip';
@@ -49,9 +55,12 @@ const String columnDaya = 'Daya';
 const String columnNoHp = 'NoHp';
 const String columnNik = 'Nik';
 const String columnNpwp = 'Npwp';
+const String columnEmail = 'Email';
 const String columnCatatan = 'Catatan';
 const String columnIsKoreksi = 'Koreksi';
 const String columnTanggalBaca = 'TanggalBaca';
+
+const double defaultPadding = 25.0;
 
 const Color primaryColor = Color(0xFF5AC4FF);
 const Color whiteColor = Color(0xFFFFFFFF);
@@ -61,6 +70,7 @@ const Color blackColor = Color(0xFF000000);
 const Color greyColor = Color(0xFFC4C4C4);
 const Color yellowColor = Color(0xFFF2F542);
 const Color purpleColor = Colors.purple;
+const Color inkWellSplashColor = purpleColor;
 
 const shimmerGradient = LinearGradient(
   colors: [
@@ -90,3 +100,15 @@ String currentTime() {
 
   return '$tanggal/$bulan/$tahun $jam:$minute';
 }
+
+BoxDecoration cardDecoration = BoxDecoration(
+  borderRadius: BorderRadius.circular(5),
+  color: whiteColor,
+  boxShadow: [
+    BoxShadow(
+      color: blackColor.withOpacity(0.25),
+      blurRadius: 4,
+      offset: Offset(0, 4),
+    )
+  ],
+);
