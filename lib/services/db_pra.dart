@@ -14,9 +14,10 @@ static DbPra _dbPra;
     return _dbPra;
   }
 
+
   Future<Database> initDb() async {
     var databasePath = await getDatabasesPath();
-    var path = databasePath + '/$tablePrabayar.db';
+    var path = databasePath + '/pdilPra.db';
 
     try {
       await Directory(databasePath).create(recursive: true);
@@ -24,7 +25,7 @@ static DbPra _dbPra;
     } catch (_) {}
 
     //create, read databases
-    var todoDatabase = openDatabase('$tablePrabayar.db', version: 1, onCreate: _createDb);
+    var todoDatabase = openDatabase('pdilPra.db', version: 1, onCreate: _createDb);
 
     //mengembalikan nilai object sebagai hasil dari fungsinya
     return todoDatabase;
@@ -76,32 +77,20 @@ static DbPra _dbPra;
     return pdil;
   }
 
-  Future<List<Pdil>> selectWhereAll(String search) async {
+  Future<List<String>> selectWhereAll({@required String query, @required String column}) async {
     Database db = await this.database;
     var mapList = await db.query(
       tablePrabayar,
-      where: '''
-      $columnIdPel LIKE ? AND (
-        $columnIdPel LIKE ? OR
-        $columnNoMeter LIKE ? OR
-        $columnNama LIKE ? OR
-        $columnAlamat LIKE ? OR
-        $columnTarip LIKE ? OR
-        $columnDaya LIKE ? OR
-        $columnNoHp LIKE ? OR
-        $columnNik LIKE ? OR
-        $columnNpwp LIKE ? OR
-        $columnEmail LIKE ? OR
-        $columnCatatan LIKE ? 
-      )
-    ''',
-      whereArgs: List.generate(12, (index) => search),
+      distinct: true,
+      columns: [column],
+      where: '$column LIKE ?',
+      whereArgs: ['%$query%'],
     );
-    List<Pdil> pdils = [];
+    List<String> strings = [];
     mapList.forEach((map) {
-      pdils.add(Pdil.fromMap(map));
+      strings.add(map[column]);
     });
-    return pdils;
+    return strings;
   }
 
   Future<int> insert(Pdil object) async {
@@ -130,7 +119,35 @@ static DbPra _dbPra;
     return count;
   }
 
-  Future<List<Pdil>> getPdilList() async {
+  Future<List<Pdil>> getPdilList({String query}) async {
+    if (query != null) {
+      Database db = await this.database;
+      var mapList = await db.query(
+        tablePrabayar,
+        where: '''
+          $columnIdPel LIKE ? OR
+          $columnNoMeter LIKE ? OR
+          $columnNama LIKE ? OR
+          $columnAlamat LIKE ? OR
+          $columnTarip LIKE ? OR
+          $columnDaya LIKE ? OR
+          $columnNoHp LIKE ? OR
+          $columnNik LIKE ? OR
+          $columnNpwp LIKE ? OR
+          $columnEmail LIKE ? OR
+          $columnCatatan LIKE ?
+        ''',
+        whereArgs: List.generate(11, (index) => query),
+        distinct: true,
+      );
+      
+      List<Pdil> listPdils = [];
+      mapList.forEach((mapPdil) { 
+        listPdils.add(Pdil.fromMap(mapPdil));
+      });
+      return listPdils;
+    }
+    
     var pdilMapList = await select();
     int count = pdilMapList.length;
     List<Pdil> pdilList = [];

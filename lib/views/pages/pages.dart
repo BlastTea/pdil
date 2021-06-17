@@ -32,3 +32,4 @@ part 'format_page.dart';
 part 'edit_format_page.dart';
 part 'home_page.dart';
 part 'customer_data_page.dart';
+part 'pdil_search.dart';

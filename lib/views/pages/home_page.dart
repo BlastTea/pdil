@@ -6,38 +6,53 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentNav = 1;
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: _currentNav == 1
-          ? FloatingActionButton(
-              backgroundColor: primaryColor,
-              onPressed: () {},
-              child: Icon(Icons.save, color: whiteColor),
-            )
-          : null,
-      bottomNavigationBar: ClippedBottomBar(
-        items: [
-          ClippedBottomBarItem(Icons.list_rounded),
-          ClippedBottomBarItem(Icons.home),
-          ClippedBottomBarItem(Icons.settings),
-        ],
-        index: _currentNav,
-        onTap: (index) {
-          setState(() {
-            _currentNav = index;
-          });
-        },
-      ),
-      body: Center(
-        child: [
-          CustomerDataPage(),
-          InputPage(),
-          SettingsPage(),
-        ][_currentNav],
-      ),
+    return BlocBuilder<BottomNavigationBloc, BottomNavigationState>(
+      builder: (_, stateBottomNavigationBar) {
+        if (stateBottomNavigationBar is BottomNavigationResult) {
+          int _currentNav = stateBottomNavigationBar.currentNav;
+          return Scaffold(
+            floatingActionButton: _currentNav == 1
+                ? BlocBuilder<FabBloc, FabState>(
+                    builder: (_, stateFab) {
+                      if (stateFab is FabShowed) {
+                        return FloatingActionButton(
+                          backgroundColor: primaryColor,
+                          onPressed: () {
+                            context.read<FabSaveBloc>().add(FabSaveOnPressed());
+                          },
+                          child: Icon(Icons.save, color: whiteColor),
+                        );
+                      }
+                      return Container();
+                    },
+                  )
+                : null,
+            bottomNavigationBar: ClippedBottomBar(
+              items: [
+                ClippedBottomBarItem(Icons.list_rounded),
+                ClippedBottomBarItem(Icons.home),
+                ClippedBottomBarItem(Icons.settings),
+              ],
+              index: _currentNav,
+              onTap: (index) {
+                setState(() {
+                  _currentNav = index;
+                });
+              },
+            ),
+            body: Center(
+              child: [
+                CustomerDataPage(),
+                InputPage(),
+                SettingsPage(),
+              ][_currentNav],
+            ),
+          );
+        }
+        return Container();
+      },
     );
   }
 }

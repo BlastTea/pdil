@@ -1,8 +1,5 @@
-import 'package:pdil/blocs/blocs.dart';
-import 'package:pdil/models/models.dart';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:pdil/services/navigation_helper.dart';
 import 'package:pdil/services/services.dart';
 
 part 'import_event.dart';
@@ -42,15 +39,19 @@ class ImportBloc extends Bloc<ImportEvent, ImportState> {
         case Import.pascabayarImported:
           if (currentImport == Import.prabayarImported) {
             await ImportServices.saveImport(Import.bothImported);
+            yield ImportBothImported();
           } else {
             await ImportServices.saveImport(event.import);
+            yield ImportPascabayarImported();
           }
           break;
         case Import.prabayarImported:
           if(currentImport == Import.pascabayarImported) {
             await ImportServices.saveImport(Import.bothImported);
+            yield ImportBothImported();
           } else {
             await ImportServices.saveImport(event.import);
+            yield ImportPrabayarImported();
           }
           break;
       }

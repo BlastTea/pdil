@@ -11,3 +11,5 @@ class InputDataAdd extends InputDataEvent {
 
   InputDataAdd({this.data, this.row, this.maxRow, this.isPasca});
 }
+
+class InputDataInit extends InputDataEvent {}

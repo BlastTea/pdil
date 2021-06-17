@@ -6,7 +6,9 @@ class InputDataState {}
 class InputDataProgress extends InputDataState {
   final double progress;
 
-  InputDataProgress(this.progress);
+  InputDataProgress({
+    @required this.progress,
+  });
 }
 
 class InputDataInitial extends InputDataState {}

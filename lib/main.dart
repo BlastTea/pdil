@@ -24,6 +24,10 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => ExportDataBloc()),
         BlocProvider(create: (_) => FontSizeBloc()..add(FetchFontSize())),
         BlocProvider(create: (_) => ImportBloc()..add(ImportCurrentImport())),
+        BlocProvider(create: (_) => BottomNavigationBloc()),
+        BlocProvider(create: (_) => FabSaveBloc()),
+        BlocProvider(create: (_) => FabBloc()),
+        BlocProvider(create: (_) => CustomerDataBloc()),
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,

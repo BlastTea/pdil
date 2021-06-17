@@ -7,6 +7,7 @@ class CurrentTextField extends StatefulWidget {
   final String hintText;
   final bool readOnly;
   final bool expands;
+  final bool isInputPage;
   final double width;
   final double height;
   final BorderRadiusGeometry borderRadius;
@@ -28,6 +29,7 @@ class CurrentTextField extends StatefulWidget {
     this.hintText,
     this.readOnly,
     this.expands = false,
+    this.isInputPage = false,
     this.width,
     this.height,
     this.borderRadius,
@@ -48,8 +50,6 @@ class CurrentTextField extends StatefulWidget {
 }
 
 class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerProviderStateMixin {
-  bool _showCancelButton = false;
-
   AnimationController _animationController;
 
   Animation<double> _animation;
@@ -62,6 +62,11 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
       duration: const Duration(milliseconds: 300),
     );
     _animation = Tween<double>(begin: -2.5, end: 1.0).animate(_animationController);
+    widget.controller?.addListener(() {
+      if (widget.controller.text != '' && widget.onCancelTap != null) {
+        _animationController.forward();
+      }
+    });
   }
 
   @override
@@ -81,7 +86,7 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
                   textInputAction: widget.textInputAction,
                   onSubmitted: widget.onSubmitted,
                   onChanged: (value) {
-                    if (value != '' && widget.onCancelTap != null) {
+                    if (widget.controller.text != '' && widget.onCancelTap != null) {
                       _animationController.forward();
                     } else if (widget.controller.text == '' && widget.onCancelTap != null) {
                       _animationController.reverse();
@@ -134,17 +139,31 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
                 ),
               ),
               if (widget.onCancelTap != null)
-                AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (_, child) => Positioned(right: 10 * _animation.value, child: child),
-                  child: GestureDetector(
-                    onTap: () {
-                      widget.onCancelTap();
+                BlocListener<PdilBloc, PdilState>(
+                  listener: (_, statePdil) {
+                    if (widget.isInputPage && statePdil is PdilClearedState) {
                       if (widget.controller.text == '' && widget.onCancelTap != null) {
                         _animationController.reverse();
                       }
-                    },
-                    child: Icon(Icons.cancel),
+                      Future.delayed(const Duration(milliseconds: 100)).then((value) {
+                        if (widget.controller.text == '' && widget.onCancelTap != null) {
+                          _animationController.reverse();
+                        }
+                      });
+                    }
+                  },
+                  child: AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (_, child) => Positioned(right: 10 * _animation.value, child: child),
+                    child: GestureDetector(
+                      onTap: () {
+                        widget.onCancelTap();
+                        if (widget.controller.text == '' && widget.onCancelTap != null) {
+                          _animationController.reverse();
+                        }
+                      },
+                      child: Icon(Icons.cancel),
+                    ),
                   ),
                 ),
             ],

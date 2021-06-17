@@ -14,24 +14,28 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
   );
 
   Pdil _currentPdil;
-  Pdil _pdilBefore;
+  Pdil _previousPdil;
+  Pdil _comparePdil;
 
   bool _isSearch = false;
   bool _isSaved = true;
   bool _isChangingPage = false;
+  bool _isPasca = true;
 
   Stopwatch _stopwatchProgress = Stopwatch();
 
   String _prefixIdPel;
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  PdilBloc _pdilBloc;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void dispose() {
+    _pdilBloc.add(UpdatePdilController(
+      previousPdil: _previousPdil,
+      currentPdil: _currentPdil,
+      comparePdil: _comparePdil,
+    ));
+    super.dispose();
   }
 
   @override
@@ -415,65 +419,263 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
   }
 
   _secondVersion(BuildContext context) {
-    return ListView(
-      physics: BouncingScrollPhysics(),
-      children: List.generate(
-        10,
-        (index) => Padding(
-          padding: EdgeInsets.fromLTRB(defaultPadding, 10, defaultPadding, index == 9 ? 60 : 0),
-          child: CurrentTextField(
-            controller: _controllers[index],
-            width: MediaQuery.of(context).size.width - 110,
-            padding: index == 0 ? const EdgeInsets.fromLTRB(10, 24, 10, 0) : index == 9 ? const EdgeInsets.all(15) : const EdgeInsets.symmetric(horizontal: 15),
-            keyboardType: [
-              TextInputType.number,
-              TextInputType.text,
-              TextInputType.text,
-              TextInputType.text,
-              TextInputType.text,
-              TextInputType.number,
-              TextInputType.number,
-              TextInputType.number,
-              TextInputType.emailAddress,
-              TextInputType.text,
-            ][index],
-            label: [
-              'IdPel',
-              'Nama',
-              'Alamat',
-              'Tarif',
-              'Daya',
-              'No Hp',
-              'NIK',
-              'NPWP',
-              'Email',
-              'CATATAN',
-            ][index],
-            readOnly: [
-              false,
-              true,
-              true,
-              true,
-              true,
-              true,
-              false,
-              false,
-              false,
-              false,
-              false,
-            ][index],
-            prefixIcon: index == 0 ? Icon(Icons.people_alt) : null,
-            height: index == 9 ? 160 : null,
-            expands: index == 9,
-            maxLines: index == 9 ? null : 1,
-            onCancelTap: index == 0
-                ? () {
-                    _controllers[index].text = '';
+    _pdilBloc = context.read<PdilBloc>();
+    return BlocBuilder<FontSizeBloc, FontSizeState>(
+      builder: (_, stateFontSize) {
+        if (stateFontSize is FontSizeResult) {
+          return BlocListener<PdilBloc, PdilState>(
+            listener: (_, statePdil) async {
+              if (statePdil is PdilError && !statePdil.isContinuingSearch) {
+                Fluttertoast.showToast(msg: statePdil.message);
+              } else if (statePdil is PdilLoaded) {
+              } else if (statePdil is PdilOnUpdate) {
+                if (statePdil.count > 0) {
+                  Fluttertoast.showToast(msg: 'Data Berhasil Disimpan');
+                  _controllers.forEach((controller) {
+                    controller.text = '';
+                  });
+                  if(_isPasca) {
+                    context.read<CustomerDataBloc>().add(UpdateCustomerDataPasca());
+                  } else if (!_isPasca) {
+                    context.read<CustomerDataBloc>().add(UpdateCustomerDataPra());
                   }
-                : null,
-            onChanged: (value) {},
-          ),
+                } else if (statePdil.count == 0) {
+                  Fluttertoast.showToast(msg: 'Data gagal Disimpan');
+                }
+              }
+            },
+            child: BlocListener<FabSaveBloc, FabSaveState>(
+              listener: (_, stateFabSave) {
+                if (stateFabSave is FabSaveOnStatePressed) {
+                  _isSaved = true;
+                  context.read<PdilBloc>().add(UpdatePdil(_previousPdil, false));
+                }
+              },
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  child: Column(children: [
+                    SizedBox(height: 10),
+                    MyToggleButton(
+                      toggleButtonSlot: ToggleButtonSlot.inputData,
+                      onTap: (isPasca) {
+                        _isPasca = isPasca;
+                        InputService.saveInputPageState(_isPasca);
+                      },
+                    ),
+                    ...List.generate(
+                      10,
+                      (index) => Padding(
+                        padding: EdgeInsets.fromLTRB(defaultPadding, 10, defaultPadding, index == 9 ? 80 : 0),
+                        child: FutureBuilder<String>(
+                          future: ImportServices.getPrefixIdpel(),
+                          builder: (_, snapshot) {
+                            if (snapshot.hasData) {
+                              _prefixIdPel = snapshot.data;
+                              return BlocBuilder<PdilBloc, PdilState>(
+                                builder: (_, pdilState) {
+                                  if (pdilState is PdilLoaded) {
+                                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                      // set data ke currentTextField
+                                      _currentPdil = pdilState.data;
+                                      if (pdilState.isFromCustomerData) {
+                                        _controllers[0].text = pdilState.data.idPel.substring(5);
+                                        _comparePdil = pdilState.data.copyWith();
+                                        _previousPdil = pdilState.data.copyWith();
+                                      } else if (pdilState.isContinousSearch) {
+                                        _comparePdil = pdilState.data.copyWith();
+                                        _previousPdil = pdilState.data.copyWith();
+                                      }
+                                      _controllers[1].text = pdilState.data.nama;
+                                      _controllers[2].text = pdilState.data.alamat;
+                                      _controllers[3].text = pdilState.data.tarip;
+                                      _controllers[4].text = pdilState.data.daya;
+                                      _controllers[5].text = pdilState.data.noHp;
+                                      _controllers[6].text = pdilState.data.nik;
+                                      _controllers[7].text = pdilState.data.npwp;
+                                      _controllers[8].text = pdilState.data.email;
+                                      _controllers[9].text = pdilState.data.catatan;
+                                    });
+                                    _isSearch = true;
+                                  } else if (pdilState is PdilClearedState) {
+                                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                      _currentPdil = null;
+                                      _comparePdil = null;
+                                      _previousPdil = null;
+
+                                      _controllers.forEach((controller) {
+                                        controller.text = '';
+                                      });
+                                    });
+                                  } else if (pdilState is UpdatedPdilController) {
+                                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                      _comparePdil = pdilState.comparePdil;
+                                      _currentPdil = pdilState.currentPdil;
+                                      _previousPdil = pdilState.previousPdil;
+                                      _controllers[0].text = pdilState.previousPdil?.idPel?.substring(5);
+                                      _controllers[1].text = pdilState.previousPdil?.nama;
+                                      _controllers[2].text = pdilState.previousPdil?.alamat;
+                                      _controllers[3].text = pdilState.previousPdil?.tarip;
+                                      _controllers[4].text = pdilState.previousPdil?.daya;
+                                      _controllers[5].text = pdilState.previousPdil?.noHp;
+                                      _controllers[6].text = pdilState.previousPdil?.nik;
+                                      _controllers[7].text = pdilState.previousPdil?.npwp;
+                                      _controllers[8].text = pdilState.previousPdil?.email;
+                                      _controllers[9].text = pdilState.previousPdil?.catatan;
+                                    });
+                                  }
+                                  return CurrentTextField(
+                                    isInputPage: true,
+                                    controller: _controllers[index],
+                                    // width: MediaQuery.of(context).size.width - 110,
+                                    padding: index == 0
+                                        ? const EdgeInsets.fromLTRB(10, 24, 10, 0)
+                                        : index == 9
+                                            ? const EdgeInsets.all(15)
+                                            : const EdgeInsets.symmetric(horizontal: 15),
+                                    keyboardType: [
+                                      TextInputType.number,
+                                      TextInputType.text,
+                                      TextInputType.text,
+                                      TextInputType.text,
+                                      TextInputType.text,
+                                      TextInputType.number,
+                                      TextInputType.number,
+                                      TextInputType.number,
+                                      TextInputType.emailAddress,
+                                      TextInputType.text,
+                                    ][index],
+                                    label: [
+                                      'IdPel',
+                                      'Nama',
+                                      'Alamat',
+                                      'Tarif',
+                                      'Daya',
+                                      'No Hp',
+                                      'NIK',
+                                      'NPWP',
+                                      'Email',
+                                      'CATATAN',
+                                    ][index],
+                                    readOnly: [
+                                      false,
+                                      true,
+                                      true,
+                                      true,
+                                      true,
+                                      false,
+                                      false,
+                                      false,
+                                      false,
+                                      false,
+                                      false,
+                                    ][index],
+                                    prefixText: index == 0 ? snapshot.data : null,
+                                    prefixIcon: index == 0 ? Icon(Icons.people_alt) : null,
+                                    height: index == 9 ? 160 : null,
+                                    expands: index == 9,
+                                    maxLines: index == 9
+                                        ? index == 0
+                                            ? 12
+                                            : null
+                                        : 1,
+                                    onCancelTap: index == 0
+                                        ? () {
+                                            if (_comparePdil != null) {
+                                              if (_comparePdil.compareTo(_previousPdil, isIgnoreIdpel: true)) {
+                                                _pdilBloc.add(ClearPdilState());
+                                              } else {
+                                                _dialogSaveChanges(context, stateFontSize);
+                                              }
+                                            }
+                                          }
+                                        : null,
+                                    onChanged: (value) {
+                                      switch (index) {
+                                        case 0:
+                                          // _previousPdil?.idPel = value;
+                                          _pdilBloc.add(FetchPdil(_prefixIdPel + value, isContinuingSearch: true));
+                                          break;
+                                        case 1:
+                                          _previousPdil?.nama = value;
+                                          break;
+                                        case 2:
+                                          _previousPdil?.alamat = value;
+                                          break;
+                                        case 3:
+                                          _previousPdil?.tarip = value;
+                                          break;
+                                        case 4:
+                                          _previousPdil?.daya = value;
+                                          break;
+                                        case 5:
+                                          _previousPdil?.noHp = value;
+                                          break;
+                                        case 6:
+                                          _previousPdil?.nik = value;
+                                          break;
+                                        case 7:
+                                          _previousPdil?.npwp = value;
+                                          break;
+                                        case 8:
+                                          _previousPdil?.email = value;
+                                          break;
+                                        case 9:
+                                          _previousPdil?.catatan = value;
+                                          break;
+                                      }
+                                      if (_comparePdil != null && index != 0) {
+                                        if (!_comparePdil.compareTo(_previousPdil, isIgnoreIdpel: true)) {
+                                          context.read<FabBloc>().add(ShowFab());
+                                        } else {
+                                          context.read<FabBloc>().add(HideFab());
+                                        }
+                                      }
+                                    },
+                                  );
+                                },
+                              );
+                            }
+                            return Container();
+                          },
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
+          );
+        }
+        return Container();
+      },
+    );
+  }
+
+  _dialogSaveChanges(BuildContext context, FontSizeResult stateFontSize) async {
+    await showDialog(
+      context: context,
+      useRootNavigator: true,
+      builder: (_) => AlertDialog(
+        title: Text(
+          'Simpan Perubahan ?',
+          style: stateFontSize.title.copyWith(fontWeight: FontWeight.w600),
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              NavigationHelper.back();
+            },
+            child: Text('Buang', style: stateFontSize.body1),
+          ),
+          TextButton(
+            onPressed: () {
+              _isSaved = true;
+              context.read<PdilBloc>().add(UpdatePdil(_previousPdil, true));
+              NavigationHelper.back();
+            },
+            child: Text('Simpan', style: stateFontSize.body1),
+          ),
+        ],
       ),
     );
   }

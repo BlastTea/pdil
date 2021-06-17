@@ -48,7 +48,6 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
 
   @override
   void dispose() {
-    _animationController.reverse();
     _animationController.dispose();
     super.dispose();
   }
@@ -67,11 +66,13 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
             );
             return Future.value(false);
           } else if (_currentBackPressTime == null || now.difference(_currentBackPressTime) < Duration(seconds: 2)) {
+            _animationController.reverse();
             SystemNavigator.pop();
             return Future.value(true);
           }
           return Future.value(false);
         }
+        _animationController.reverse();
         return Future.value(true);
       },
       child: BlocBuilder<FontSizeBloc, FontSizeState>(
@@ -99,12 +100,15 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
                         children: [
                           _circleOpenFolder(context),
                           SizedBox(height: 5),
-                          MyToggleButton((_isPasca) {
-                            if (!_isPasca) {
-                              this._isPasca = _isPasca;
-                              formatChecks.insert(1, ['NO METER']);
-                            }
-                          }),
+                          MyToggleButton(
+                            toggleButtonSlot: ToggleButtonSlot.import,
+                            onTap: (_isPasca) {
+                              if (!_isPasca) {
+                                this._isPasca = _isPasca;
+                                formatChecks.insert(1, ['NO METER']);
+                              }
+                            },
+                          ),
                           SizedBox(height: 8),
                           Material(
                             child: CurrentTextField(
@@ -172,8 +176,7 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
                 useRootNavigator: true,
                 context: context,
                 builder: (_) => AlertDialog(
-                      title: Text("Apakah Anda yakin ?",
-                          style: stateFontSize.title.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
+                      title: Text("Apakah Anda yakin ?", style: stateFontSize.title.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
                       content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
                       actions: [
                         TextButton(
@@ -217,32 +220,49 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
                     Future.delayed(Duration(milliseconds: 500)).then((value) {
                       NavigationHelper.back();
                       NavigationHelper.back();
+
+                      Future.delayed(const Duration(milliseconds: 200)).then((value) {
+                        context.read<InputDataBloc>().add(InputDataInit());
+
+                        if (_isPasca) {
+                          context.read<CustomerDataBloc>().add(UpdateCustomerDataPasca());
+                        } else if (!_isPasca) {
+                          context.read<CustomerDataBloc>().add(UpdateCustomerDataPra());
+                        }
+                      });
                     });
                   }
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 2,
-                        height: 6,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 500),
-                          width: MediaQuery.of(context).size.width / 2 * inputDataState.progress,
-                          height: 6,
-                          color: inputDataState.progress < 0.5
-                              ? redColor
-                              : inputDataState.progress < 0.7
-                                  ? yellowColor
-                                  : greenColor,
-                        ),
+                      Stack(
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width / 2,
+                            height: 6,
+                            decoration: BoxDecoration(color: greyColor, borderRadius: BorderRadius.circular(3)),
+                          ),
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 500),
+                            width: MediaQuery.of(context).size.width / 2 * inputDataState.progress,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: inputDataState.progress < 0.5
+                                  ? redColor
+                                  : inputDataState.progress < 0.7
+                                      ? yellowColor
+                                      : greenColor,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(width: 10),
                       Stack(
                         alignment: Alignment.center,
                         children: [
                           CircularProgressIndicator(),
-                          Text('${int.parse((inputDataState.progress * 100).toString().split(".")[0])}%',
-                              style: stateFontSize.body2),
+                          Text('${int.parse((inputDataState.progress * 100).toString().split(".")[0])}%', style: stateFontSize.body2),
                         ],
                       ),
                     ],
@@ -254,152 +274,6 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
           ),
         ),
       );
-
-  _importContainer(BuildContext context, FontSizeResult stateFontSize) => Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            CurrentTextField(
-              controller: TextEditingController(text: directory),
-              label: "File",
-              readOnly: true,
-              width: MediaQuery.of(context).size.width - 76,
-              borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
-            ),
-            Container(
-              width: 60,
-              height: 40 + (stateFontSize.title.fontSize - 20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
-                color: primaryColor,
-              ),
-              child: Material(
-                borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
-                color: Colors.transparent,
-                child: InkWell(
-                  hoverColor: Colors.lightBlue,
-                  borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
-                  onTap: () async {
-                    result = await FilePicker.platform.pickFiles(
-                      type: FileType.custom,
-                      allowedExtensions: ['xlsx', 'xltx'],
-                      allowMultiple: false,
-                    );
-
-                    context.read<ErrorCheckBloc>().add(ErrorCheckClear());
-                    setState(() {
-                      directory = "";
-                    });
-
-                    if (result != null) {
-                      List files = result.files.single.path.split("/");
-                      setState(() {
-                        directory = files[files.length - 1];
-                      });
-                    }
-                  },
-                  child: Icon(
-                    Icons.folder_open,
-                    color: whiteColor,
-                    size: stateFontSize.title.fontSize + 4,
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      );
-
-  _message(BuildContext context, String message, FontSizeResult stateFontSize) =>
-      BlocBuilder<ErrorCheckBloc, ErrorCheckState>(
-        builder: (_, state) => (state is ErrorCheckResult)
-            ? RichText(
-                text: TextSpan(
-                  text: "Kolom tidak valid dengan format, silahkan edit :\n",
-                  style: stateFontSize.body1.copyWith(color: redColor),
-                  children: [
-                    ...List.generate(
-                      state.data.length ?? 0,
-                      (index) => TextSpan(
-                        text: "Kolom ",
-                        style: stateFontSize.body1.copyWith(color: redColor),
-                        children: [
-                          TextSpan(
-                            text: state.data[index].check,
-                            style: stateFontSize.body1.copyWith(color: primaryColor),
-                          ),
-                          TextSpan(
-                            text: " dengan ",
-                            style: stateFontSize.body1.copyWith(color: redColor),
-                          ),
-                          TextSpan(
-                            text: state.data[index].target + (index < state.data.length - 1 ? "\n" : ""),
-                            style: stateFontSize.body1.copyWith(color: primaryColor),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              )
-            : (state is ErrorCheckSucessfulState)
-                ? Text("Kolom dan Data Valid!", style: stateFontSize.body1.copyWith(color: greenColor))
-                : Container(),
-      );
-
-  _confirmToInput(BuildContext context, FontSizeResult stateFontSize) {
-    return ElevatedButton(
-      onPressed: () async {
-        if (directory != "")
-          showDialog(
-              useRootNavigator: true,
-              context: context,
-              builder: (_) => AlertDialog(
-                    title: Text("Apakah Anda yakin ?",
-                        style: stateFontSize.title.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
-                    content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
-                    actions: [
-                      TextButton(
-                        onPressed: () async {
-                          NavigationHelper.back();
-                          _inputDataToDatabase(context);
-                        },
-                        child: Text(
-                          "Ya",
-                          style: stateFontSize.body1,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          NavigationHelper.back();
-                        },
-                        child: Text(
-                          "Tidak",
-                          style: stateFontSize.body1,
-                        ),
-                      ),
-                    ],
-                  ));
-        else
-          showMySnackBar(context, text: "Silahkan Pilih File terlebih dahulu !!!");
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text("Proses", style: stateFontSize.body1.copyWith(color: whiteColor)),
-          SizedBox(width: 10),
-          Transform.rotate(
-            angle: pi,
-            child: Icon(
-              Icons.arrow_back,
-              color: whiteColor,
-              size: 18,
-            ),
-          )
-        ],
-      ),
-    );
-  }
 
   _pickFile(BuildContext context) async {
     result = await FilePicker.platform.pickFiles(
@@ -430,24 +304,44 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
 
     for (var table in excel.tables.keys) {
       for (var row in excel.tables[table].rows) {
-        print("pdil Row : $row");
+        // print("pdil Row : $row");
         Pdil pdilExcel;
         if (counter > 0 && counter < 2) {
-          context.read<ImportBloc>().add(ImportConfirm(_isPasca ? Import.pascabayarImported : Import.prabayarImported,
-              prefixIdPel: row[1].toString().substring(0, 5)));
+          context.read<ImportBloc>().add(ImportConfirm(_isPasca ? Import.pascabayarImported : Import.prabayarImported, prefixIdPel: row[1].toString().substring(0, 5)));
         }
         if (counter > 0) {
           pdilExcel = Pdil(
             idPel: row[formatIndexs[0]].toString(),
-            nama: row[formatIndexs[1]].toString(),
-            alamat: row[formatIndexs[2]].toString(),
-            tarip: row[formatIndexs[3]].toString(),
-            daya: row[formatIndexs[4]].toString().split(".")[0],
-            noHp: formatIndexs.length == 10 ? row[formatIndexs[5]] : null,
-            nik: formatIndexs.length == 10 ? row[formatIndexs[6]] : null,
-            npwp: formatIndexs.length == 10 ? row[formatIndexs[7]] : null,
-            catatan: formatIndexs.length == 10 ? row[formatIndexs[8]] : null,
-            tanggalBaca: formatIndexs.length == 10 ? row[formatIndexs[9]] : null,
+            noMeter: !_isPasca ? row[formatIndexs[1]].toString() : null,
+            nama: _isPasca ? row[formatIndexs[1]].toString() : row[formatIndexs[2]].toString(),
+            alamat: _isPasca ? row[formatIndexs[2]].toString() : row[formatIndexs[3]].toString(),
+            tarip: _isPasca ? row[formatIndexs[3]].toString() : row[formatIndexs[4]].toString(),
+            daya: _isPasca ? row[formatIndexs[4]].toString() : row[formatIndexs[5]].toString().split(".")[0],
+            noHp: formatIndexs.length == 10
+                ? _isPasca
+                    ? row[formatIndexs[5]]
+                    : row[formatIndexs[6]]
+                : null,
+            nik: formatIndexs.length == 10
+                ? _isPasca
+                    ? row[formatIndexs[6]]
+                    : row[formatIndexs[7]]
+                : null,
+            npwp: formatIndexs.length == 10
+                ? _isPasca
+                    ? row[formatIndexs[7]]
+                    : row[formatIndexs[8]]
+                : null,
+            catatan: formatIndexs.length == 10
+                ? _isPasca
+                    ? row[formatIndexs[8]]
+                    : row[formatIndexs[9]]
+                : null,
+            tanggalBaca: formatIndexs.length == 10
+                ? _isPasca
+                    ? row[formatIndexs[9]]
+                    : row[formatIndexs[10]]
+                : null,
             isKoreksi: false,
           );
           context.read<InputDataBloc>().add(InputDataAdd(

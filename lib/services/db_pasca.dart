@@ -16,7 +16,7 @@ class DbPasca {
 
   Future<Database> initDb() async {
     var databasePath = await getDatabasesPath();
-    var path = databasePath + '/$tablePascabayar.db';
+    var path = databasePath + '/pdilPasca.db';
 
     try {
       await Directory(databasePath).create(recursive: true);
@@ -24,7 +24,7 @@ class DbPasca {
     } catch (_) {}
 
     //create, read databases
-    var todoDatabase = openDatabase('$tablePascabayar.db', version: 1, onCreate: _createDb);
+    var todoDatabase = openDatabase('pdilPasca.db', version: 1, onCreate: _createDb);
 
     //mengembalikan nilai object sebagai hasil dari fungsinya
     return todoDatabase;
@@ -76,31 +76,20 @@ class DbPasca {
     return pdil;
   }
 
-  Future<List<Pdil>> selectWhereAll(String search) async {
+  Future<List<String>> selectWhereAll({@required String query, @required String column}) async {
     Database db = await this.database;
     var mapList = await db.query(
       tablePascabayar,
-      where: '''
-      $columnIdPel LIKE ? AND (
-        $columnIdPel LIKE ? OR
-        $columnNama LIKE ? OR
-        $columnAlamat LIKE ? OR
-        $columnTarip LIKE ? OR
-        $columnDaya LIKE ? OR
-        $columnNoHp LIKE ? OR
-        $columnNik LIKE ? OR
-        $columnNpwp LIKE ? OR
-        $columnEmail LIKE ? OR
-        $columnCatatan LIKE ? 
-      )
-    ''',
-      whereArgs: List.generate(11, (index) => search),
+      distinct: true,
+      columns: [column],
+      where: '$column LIKE ?',
+      whereArgs: ['%$query%'],
     );
-    List<Pdil> pdils = [];
+    List<String> strings = [];
     mapList.forEach((map) {
-      pdils.add(Pdil.fromMap(map));
+      strings.add(map[column]);
     });
-    return pdils;
+    return strings;
   }
 
   Future<int> insert(Pdil object) async {
@@ -129,11 +118,37 @@ class DbPasca {
     return count;
   }
 
-  Future<List<Pdil>> getPdilList() async {
+  Future<List<Pdil>> getPdilList({String query}) async {
+    if (query != null) {
+      Database db = await this.database;
+      var mapList = await db.query(
+        tablePascabayar,
+        where: '''
+          $columnIdPel LIKE ? OR
+          $columnNama LIKE ? OR
+          $columnAlamat LIKE ? OR
+          $columnTarip LIKE ? OR
+          $columnDaya LIKE ? OR
+          $columnNoHp LIKE ? OR
+          $columnNik LIKE ? OR
+          $columnNpwp LIKE ? OR
+          $columnEmail LIKE ? OR
+          $columnCatatan LIKE ?
+        ''',
+        whereArgs: List.generate(10, (index) => query),
+        distinct: true,
+      );
+      
+      List<Pdil> listPdils = [];
+      mapList.forEach((mapPdil) { 
+        listPdils.add(Pdil.fromMap(mapPdil));
+      });
+      return listPdils;
+    }
+    
     var pdilMapList = await select();
-    int count = pdilMapList.length;
     List<Pdil> pdilList = [];
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < pdilMapList.length; i++) {
       pdilList.add(Pdil.fromMap(pdilMapList[i]));
     }
     return pdilList;

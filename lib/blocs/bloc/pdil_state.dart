@@ -7,8 +7,10 @@ class PdilInitial extends PdilState {}
 
 class PdilLoaded extends PdilState {
   final Pdil data;
+  final bool isFromCustomerData;
+  final bool isContinousSearch;
 
-  PdilLoaded(this.data);
+  PdilLoaded(this.data, {this.isFromCustomerData = false, this.isContinousSearch = false});
 }
 
 class PdilError extends PdilState {
@@ -23,4 +25,18 @@ class PdilOnUpdate extends PdilState {
   final bool isUsingSaveDialog;
 
   PdilOnUpdate(this.count, this.isUsingSaveDialog);
+}
+
+class PdilClearedState extends PdilState {}
+
+class UpdatedPdilController extends PdilState {
+  final Pdil previousPdil;
+  final Pdil currentPdil;
+  final Pdil comparePdil;
+
+  UpdatedPdilController({
+    @required this.previousPdil,
+    @required this.currentPdil,
+    @required this.comparePdil,
+  });
 }

@@ -34,7 +34,7 @@ class Pdil {
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
       columnIdPel: idPel,
-      columnNoMeter : noMeter,
+      columnNoMeter: noMeter,
       columnNama: nama,
       columnAlamat: alamat,
       columnTarip: tarip,
@@ -42,7 +42,7 @@ class Pdil {
       columnNoHp: noHp,
       columnNik: nik,
       columnNpwp: npwp,
-      columnEmail : email,
+      columnEmail: email,
       columnCatatan: catatan,
       columnIsKoreksi: isKoreksi == true ? 1 : 0,
       columnTanggalBaca: tanggalBaca,
@@ -66,9 +66,9 @@ class Pdil {
     tanggalBaca = map[columnTanggalBaca];
   }
 
-  List<String> toList({bool isPasca = true}) => [
+  List<String> toList({bool isPasca = true, isExport = true}) => [
         idPel,
-        if(!isPasca) noMeter,
+        if (!isPasca) noMeter,
         nama,
         alamat,
         tarip,
@@ -78,7 +78,7 @@ class Pdil {
         npwp,
         email,
         catatan,
-        tanggalBaca,
+        if(!isExport) tanggalBaca,
       ];
 
   Pdil copyWith({
@@ -111,4 +111,39 @@ class Pdil {
         isKoreksi: isKoreksi ?? this.isKoreksi,
         tanggalBaca: tanggalBaca ?? this.tanggalBaca,
       );
+
+  /// return true jika semua field atau atribut sama,
+  /// jika tidak sama maka akan return false
+  bool compareTo(Pdil pdil, {bool isIgnoreIdpel = true}) {
+    if (!isIgnoreIdpel && idPel != pdil.idPel) {
+      return false;
+    } else if (noMeter != pdil.noMeter) {
+      return false;
+    } else if (nama != pdil.nama) {
+      return false;
+    } else if (alamat != pdil.alamat) {
+      return false;
+    } else if (tarip != pdil.tarip) {
+      return false;
+    } else if (daya != pdil.daya) {
+      return false;
+    } else if (noHp != pdil.noHp) {
+      return false;
+    } else if (nik != pdil.nik) {
+      return false;
+    } else if (npwp != pdil.npwp) {
+      return false;
+    } else if (email != pdil.email) {
+      return false;
+    } else if (catatan != pdil.catatan) {
+      return false;
+    }
+
+    return true;
+  }
+
+  @override
+  String toString() {
+    return 'Pdil(idPel : $idPel, noMeter : $noMeter, nama : $nama, alamat : $alamat, tarif : $tarip, daya : $daya, noHp : $noHp, nik : $nik, npwp : $npwp, email : $email, catatan : $catatan)';
+  }
 }

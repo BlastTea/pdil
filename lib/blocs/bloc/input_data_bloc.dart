@@ -19,6 +19,10 @@ class InputDataBloc extends Bloc<InputDataEvent, InputDataState> {
 
   @override
   Stream<InputDataState> mapEventToState(InputDataEvent event) async* {
+    // Database dbPascaDatabase = await dbPasca.database;
+    // Database dbPraDatabase = await dbPra.database;
+    // print('(inputDataBloc) dbPasca.isOpen : ${dbPascaDatabase.isOpen}');
+    // print('(inputDataBloc) dbPra.isOpen : ${dbPraDatabase.isOpen}');
     if (event is InputDataAdd) {
       // print("pdil Excel idPel : ${event.data.idPel}");
       // print("pdil Excel nama : ${event.data.nama}");
@@ -32,10 +36,12 @@ class InputDataBloc extends Bloc<InputDataEvent, InputDataState> {
       double persentase = event.row / event.maxRow;
       if (event.isPasca) {
         await dbPasca.insert(event.data);
-      } else if(!event.isPasca) {
+      } else if (!event.isPasca) {
         await dbPra.insert(event.data);
       }
-      yield InputDataProgress(persentase);
+      yield InputDataProgress(progress: persentase);
+    } else if (event is InputDataInit) {
+      yield InputDataInitial();
     }
   }
 }

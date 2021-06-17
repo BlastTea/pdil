@@ -116,15 +116,23 @@ class _SettingsPageState extends State<SettingsPage> {
 
   _secondVersion(BuildContext context) => BlocBuilder<FontSizeBloc, FontSizeState>(builder: (_, stateFontSize) {
         if (stateFontSize is FontSizeResult) {
-          return CusScrollFold(
-            title: 'Pengaturan',
-            children: [
-              _listFontSize(context, stateFontSize),
-              _divider(context),
-              _listExport(context, stateFontSize, isExport: false),
-              _divider(context),
-              _listExport(context, stateFontSize, isExport: true),
-            ],
+          return BlocBuilder<ImportBloc, ImportState>(
+            builder: (_, stateImport) {
+              return CusScrollFold(
+                title: 'Pengaturan',
+                children: [
+                  _listFontSize(context, stateFontSize),
+                  _divider(context),
+                  if (stateImport is! ImportBothImported) ...[
+                    _listImport(context, stateFontSize),
+                    _divider(context),
+                  ],
+                  _listExport(context, stateFontSize, isExport: false),
+                  _divider(context),
+                  _listExport(context, stateFontSize, isExport: true),
+                ],
+              );
+            },
           );
         }
         return Container();
@@ -175,6 +183,32 @@ class _SettingsPageState extends State<SettingsPage> {
         },
       );
 
+  _listImport(BuildContext context, FontSizeResult stateFontSize) => ListTile(
+        leading: Stack(
+          children: [
+            Image.asset(
+              "assets/images/ExportExcel.png",
+              width: 30,
+              height: 30,
+            ),
+          ],
+        ),
+        title: Text(
+          'Import',
+          style: stateFontSize.subtitle.copyWith(fontWeight: FontWeight.w600),
+        ),
+        onTap: () {
+          NavigationHelper.to(
+            PageRouteBuilder(
+              barrierColor: blackColor.withOpacity(0.5),
+              barrierDismissible: false,
+              opaque: false,
+              pageBuilder: (_, __, ___) => ImportPage(),
+            ),
+          );
+        },
+      );
+
   _listExport(BuildContext context, FontSizeResult stateFontSize, {bool isExport = true}) => ListTile(
         leading: Stack(
           children: [
@@ -208,24 +242,21 @@ class _SettingsPageState extends State<SettingsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(isExport ? 'Export' : 'Simpan', style: stateFontSize.title),
-              if (isExport)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    MyToggleButton(
-                      (isPasca) {
-                        _isPasca = isPasca;
-                      },
-                    ),
-                    CheckboxIsExportBoth(
-                      isExportBoth: _isExportBoth,
-                      onChanged: (newValue) {
-                        _isExportBoth = newValue;
-                      },
-                      stateFontSize: stateFontSize,
-                    ),
-                  ],
+              if (isExport) ...[
+                CheckboxIsExportBoth(
+                  isExportBoth: _isExportBoth,
+                  onChanged: (newValue) {
+                    _isExportBoth = newValue;
+                  },
+                  stateFontSize: stateFontSize,
                 ),
+                MyToggleButton(
+                  toggleButtonSlot: ToggleButtonSlot.export,
+                  onTap: (isPasca) {
+                    _isPasca = isPasca;
+                  },
+                ),
+              ],
               SizedBox(height: 5),
               CurrentTextField(
                 controller: _controllerExportData,
@@ -262,8 +293,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             context: context,
                             builder: (_) => AlertDialog(
                                   title: Text("Apakah Anda yakin ?",
-                                      style:
-                                          stateFontSize.title.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
+                                      style: stateFontSize.title.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
                                   content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
                                   actions: [
                                     TextButton(
@@ -364,8 +394,7 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (_) {} finally {}
   }
 
-  _loadingExport({@required BuildContext context, @required FontSizeResult stateFontSize, @required bool isExport}) =>
-      NavigationHelper.to(
+  _loadingExport({@required BuildContext context, @required FontSizeResult stateFontSize, @required bool isExport}) => NavigationHelper.to(
         PageRouteBuilder(
           barrierColor: blackColor.withOpacity(0.5),
           barrierDismissible: false,
@@ -412,8 +441,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             alignment: Alignment.center,
                             children: [
                               CircularProgressIndicator(),
-                              Text('${int.parse((exportDataState.progress * 100).toString().split(".")[0])}%',
-                                  style: stateFontSize.body2),
+                              Text('${int.parse((exportDataState.progress * 100).toString().split(".")[0])}%', style: stateFontSize.body2),
                             ],
                           ),
                         ],
@@ -555,19 +583,22 @@ class CheckboxIsExportBoth extends StatefulWidget {
 class _CheckboxIsExportBothState extends State<CheckboxIsExportBoth> {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text('Export keduanya', style: widget.stateFontSize.body1),
-        Checkbox(
-          value: widget.isExportBoth,
-          onChanged: (newValue) {
-            setState(() {
-              widget.isExportBoth = newValue;
-              widget.onChanged(newValue);
-            });
-          },
-        ),
-      ],
+    return Transform(
+      transform: Matrix4.translationValues(-12.0, 0.0, 0.0),
+      child: Row(
+        children: [
+          Checkbox(
+            value: widget.isExportBoth,
+            onChanged: (newValue) {
+              setState(() {
+                widget.isExportBoth = newValue;
+                widget.onChanged(newValue);
+              });
+            },
+          ),
+          Text('Export keduanya', style: widget.stateFontSize.body1),
+        ],
+      ),
     );
   }
 }
