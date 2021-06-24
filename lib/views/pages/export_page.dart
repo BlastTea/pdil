@@ -17,7 +17,7 @@ class ExportPage extends StatelessWidget {
           ? Scaffold(
               appBar: AppBar(
                 title: Text(isSimpan ? "Simpan" : "Export",
-                    style: stateFontSize.title.copyWith(fontWeight: FontWeight.w600, color: whiteColor)),
+                    style: stateFontSize.title!.copyWith(fontWeight: FontWeight.w600, color: whiteColor)),
               ),
               body: Stack(
                 children: [
@@ -41,7 +41,7 @@ class ExportPage extends StatelessWidget {
                                     context: context,
                                     builder: (_) => AlertDialog(
                                           title: Text("Apakah Anda yakin ?",
-                                              style: stateFontSize.title
+                                              style: stateFontSize.title!
                                                   .copyWith(color: blackColor, fontWeight: FontWeight.w600)),
                                           content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
                                           actions: [
@@ -73,7 +73,7 @@ class ExportPage extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text("${isSimpan ? 'Simpan' : 'Export'} ke Excel",
-                                    style: stateFontSize.body1.copyWith(color: whiteColor)),
+                                    style: stateFontSize.body1!.copyWith(color: whiteColor)),
                                 SizedBox(width: 10),
                                 Transform.rotate(
                                   angle: pi,
@@ -147,10 +147,10 @@ class ExportPage extends StatelessWidget {
 
       var sheet = excel['Sheet1'];
 
-      List<Pdil> pdils = await dbHelper.getPdilList();
+      List<Pdil>? pdils = await dbHelper.getPdilList();
 
       int counter = 0;
-      pdils.forEach((row) {
+      pdils!.forEach((row) {
         if (counter < 1) {
           sheet.appendRow([
             'NOMOR',
@@ -175,15 +175,17 @@ class ExportPage extends StatelessWidget {
         sheet.appendRow(rows);
       });
 
-      List<Directory> listDirectory = await getExternalStorageDirectories(type: StorageDirectory.downloads);
+      List<Directory>? listDirectory = await getExternalStorageDirectories(type: StorageDirectory.downloads);
 
-      excel.encode().then((value) async {
-        var file = File(listDirectory[0].path + '/$namaFile.xlsx');
+      var data = await excel.save();
 
-        await file.create(recursive: true);
+      // excel.encode().then((value) async {
+      //   var file = File(listDirectory[0].path + '/$namaFile.xlsx');
 
-        file.writeAsBytesSync(value);
-      });
+      //   await file.create(recursive: true);
+
+      //   file.writeAsBytesSync(value);
+      // });
     } catch (_) {} finally {
       if (isSimpan) {
         showMySnackBar(context, text: "Data Telah Di Simpan");

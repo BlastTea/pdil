@@ -1,7 +1,7 @@
 part of 'services.dart';
 
 class FileHelper {
-  static FileHelper _fileHelper;
+  static FileHelper? _fileHelper;
 
   FileHelper._createObject();
 
@@ -9,7 +9,7 @@ class FileHelper {
     if (_fileHelper == null) {
       _fileHelper = FileHelper._createObject();
     }
-    return _fileHelper;
+    return _fileHelper!;
   }
 
   Future<String> get localPath async {

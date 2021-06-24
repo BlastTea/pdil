@@ -1,19 +1,19 @@
 part of 'models.dart';
 
 class Pdil {
-  String idPel;
-  String noMeter;
-  String nama;
-  String alamat;
-  String tarip;
-  String daya;
-  String noHp;
-  String nik;
-  String npwp;
-  String email;
-  String catatan;
-  bool isKoreksi;
-  String tanggalBaca;
+  String? idPel;
+  String? noMeter;
+  String? nama;
+  String? alamat;
+  String? tarip;
+  String? daya;
+  String? noHp;
+  String? nik;
+  String? npwp;
+  String? email;
+  String? catatan;
+  bool? isKoreksi;
+  String? tanggalBaca;
 
   Pdil({
     this.idPel,
@@ -66,7 +66,7 @@ class Pdil {
     tanggalBaca = map[columnTanggalBaca];
   }
 
-  List<String> toList({bool isPasca = true, isExport = true}) => [
+  List<String?> toList({bool isPasca = true, isExport = true}) => [
         idPel,
         if (!isPasca) noMeter,
         nama,
@@ -82,19 +82,19 @@ class Pdil {
       ];
 
   Pdil copyWith({
-    String idPel,
-    String noMeter,
-    String nama,
-    String alamat,
-    String tarip,
-    String daya,
-    String noHp,
-    String nik,
-    String npwp,
-    String email,
-    String catatan,
-    bool isKoreksi,
-    String tanggalBaca,
+    String? idPel,
+    String? noMeter,
+    String? nama,
+    String? alamat,
+    String? tarip,
+    String? daya,
+    String? noHp,
+    String? nik,
+    String? npwp,
+    String? email,
+    String? catatan,
+    bool? isKoreksi,
+    String? tanggalBaca,
   }) =>
       Pdil(
         idPel: idPel ?? this.idPel,
@@ -114,10 +114,10 @@ class Pdil {
 
   /// return true jika semua field atau atribut sama,
   /// jika tidak sama maka akan return false
-  bool compareTo(Pdil pdil, {bool isIgnoreIdpel = true}) {
-    if (!isIgnoreIdpel && idPel != pdil.idPel) {
+  bool compareTo(Pdil? pdil, {bool isIgnoreIdpel = true}) {
+    if (!isIgnoreIdpel && idPel != pdil!.idPel) {
       return false;
-    } else if (noMeter != pdil.noMeter) {
+    } else if (noMeter != pdil!.noMeter) {
       return false;
     } else if (nama != pdil.nama) {
       return false;

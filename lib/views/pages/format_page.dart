@@ -28,7 +28,7 @@ class _FormatPageState extends State<FormatPage> {
           ? Scaffold(
               appBar: AppBar(
                 title: Text("Format Kolom",
-                    style: stateFontSize.title.copyWith(color: whiteColor, fontWeight: FontWeight.w600)),
+                    style: stateFontSize.title!.copyWith(color: whiteColor, fontWeight: FontWeight.w600)),
               ),
               body: _body(context, stateFontSize),
             )
@@ -57,20 +57,20 @@ class _FormatPageState extends State<FormatPage> {
                 child: Row(
                   children: [
                     SizedBox(
-                      width: 70 + ((stateFontSize.title.fontSize - 20) / 2 * 6.5),
+                      width: 70 + ((stateFontSize.title!.fontSize! - 20) / 2 * 6.5),
                       child: Text(
                         '${formats[index]}',
-                        style: stateFontSize.subtitle.copyWith(color: primaryColor),
+                        style: stateFontSize.subtitle!.copyWith(color: primaryColor),
                       ),
                     ),
                     Text(
                       '=  ',
-                      style: stateFontSize.subtitle.copyWith(color: blackColor),
+                      style: stateFontSize.subtitle!.copyWith(color: blackColor),
                     ),
                     Expanded(
                       child: Text(
                         '${widget.formatChecks[index]}',
-                        style: stateFontSize.subtitle.copyWith(color: greenColor),
+                        style: stateFontSize.subtitle!.copyWith(color: greenColor),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),

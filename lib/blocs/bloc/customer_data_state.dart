@@ -6,13 +6,15 @@ abstract class CustomerDataState {}
 class CustomerDataInitial extends CustomerDataState {}
 
 class CustomerDataResult extends CustomerDataState {
-  final List<Pdil> pdilPasca;
-  final List<Pdil> pdilPra;
-  final String searchResult;
+  final List<Pdil>? pdilPasca;
+  final List<Pdil>? pdilPra;
+  final String? searchResult;
+  final String? column;
 
   CustomerDataResult({
-    @required this.pdilPasca,
-    @required this.pdilPra,
+    required this.pdilPasca,
+    required this.pdilPra,
     this.searchResult,
+    this.column,
   });
 }

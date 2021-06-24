@@ -6,11 +6,23 @@ abstract class PdilState {}
 class PdilInitial extends PdilState {}
 
 class PdilLoaded extends PdilState {
-  final Pdil data;
+  final Pdil? originalPdilPasca;
+  final Pdil? currentPdilPasca;
+  final Pdil? originalPdilPra;
+  final Pdil? currentPdilPra;
   final bool isFromCustomerData;
   final bool isContinousSearch;
+  final bool isPasca;
 
-  PdilLoaded(this.data, {this.isFromCustomerData = false, this.isContinousSearch = false});
+  PdilLoaded({
+    required this.originalPdilPasca,
+    required this.currentPdilPasca,
+    required this.originalPdilPra,
+    required this.currentPdilPra,
+    this.isFromCustomerData = false,
+    this.isContinousSearch = false,
+    required this.isPasca,
+  });
 }
 
 class PdilError extends PdilState {
@@ -27,16 +39,26 @@ class PdilOnUpdate extends PdilState {
   PdilOnUpdate(this.count, this.isUsingSaveDialog);
 }
 
-class PdilClearedState extends PdilState {}
+class PdilClearedState extends PdilState {
+  final bool isPasca;
+
+  PdilClearedState({required this.isPasca});
+}
 
 class UpdatedPdilController extends PdilState {
-  final Pdil previousPdil;
-  final Pdil currentPdil;
-  final Pdil comparePdil;
+  final Pdil? currentPdilPasca;
+  final Pdil? originalPdilPasca;
+
+  final Pdil? currentPdilPra;
+  final Pdil? originalPdilPra;
+
+  final bool isPasca;
 
   UpdatedPdilController({
-    @required this.previousPdil,
-    @required this.currentPdil,
-    @required this.comparePdil,
+    required this.currentPdilPasca,
+    required this.originalPdilPasca,
+    required this.currentPdilPra,
+    required this.originalPdilPra,
+    required this.isPasca,
   });
 }

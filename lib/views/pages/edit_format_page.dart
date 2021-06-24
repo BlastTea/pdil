@@ -19,7 +19,7 @@ class _EditFormatPageState extends State<EditFormatPage> {
               appBar: AppBar(
                 title: Text(
                   widget.title,
-                  style: stateFontSize.title.copyWith(color: whiteColor, fontWeight: FontWeight.w600),
+                  style: stateFontSize.title!.copyWith(color: whiteColor, fontWeight: FontWeight.w600),
                 ),
               ),
             )

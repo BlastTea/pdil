@@ -33,11 +33,11 @@ class InputDataBloc extends Bloc<InputDataEvent, InputDataState> {
       // print("pdil Excel nik : ${event.data.nik}");
       // print("pdil Excel npwp : ${event.data.npwp}");
 
-      double persentase = event.row / event.maxRow;
-      if (event.isPasca) {
-        await dbPasca.insert(event.data);
-      } else if (!event.isPasca) {
-        await dbPra.insert(event.data);
+      double persentase = event.row! / event.maxRow;
+      if (event.isPasca!) {
+        await dbPasca.insert(event.data!);
+      } else if (!event.isPasca!) {
+        await dbPra.insert(event.data!);
       }
       yield InputDataProgress(progress: persentase);
     } else if (event is InputDataInit) {

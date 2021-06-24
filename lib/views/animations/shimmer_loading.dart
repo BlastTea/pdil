@@ -3,42 +3,42 @@ part of 'animations.dart';
 class _SlidingGradientTransform extends GradientTransform {
   const _SlidingGradientTransform({this.slidePercent});
 
-  final double slidePercent;
+  final double? slidePercent;
 
   @override
-  Matrix4 transform(Rect bounds, {TextDirection textDirection}) {
-    return Matrix4.translationValues(bounds.width * slidePercent, 0.0, 0.0);
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    return Matrix4.translationValues(bounds.width * slidePercent!, 0.0, 0.0);
   }
 }
 
 class ShimmerLoading extends StatefulWidget {
   final bool isLoading;
-  final Widget child;
+  final Widget? child;
 
-  ShimmerLoading({Key key, @required this.isLoading, this.child}) : super(key: key);
+  ShimmerLoading({Key? key, required this.isLoading, this.child}) : super(key: key);
 
   @override
   _ShimmerLoadingState createState() => _ShimmerLoadingState();
 }
 
 class _ShimmerLoadingState extends State<ShimmerLoading> {
-  Listenable _shimmerChanges;
+  Listenable? _shimmerChanges;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_shimmerChanges != null) {
-      _shimmerChanges.removeListener(_onShimmerChange);
+      _shimmerChanges!.removeListener(_onShimmerChange);
     }
-    _shimmerChanges = Shimmer.of(context).shimmerChanges;
+    _shimmerChanges = Shimmer.of(context)!.shimmerChanges;
     if (_shimmerChanges != null) {
-      _shimmerChanges.addListener(_onShimmerChange);
+      _shimmerChanges!.addListener(_onShimmerChange);
     }
   }
 
   @override
   void dispose() {
-    _shimmerChanges.removeListener(_onShimmerChange);
+    _shimmerChanges!.removeListener(_onShimmerChange);
     super.dispose();
   }
 
@@ -51,10 +51,10 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
   @override
   Widget build(BuildContext context) {
     if (!widget.isLoading) {
-      return widget.child;
+      return widget.child!;
     }
 
-    final shimmer = Shimmer.of(context);
+    final shimmer = Shimmer.of(context)!;
     if (!shimmer.isSized) {
       return SizedBox();
     }
@@ -84,15 +84,15 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
 
 class Shimmer extends StatefulWidget {
   final LinearGradient linearGradient;
-  final Widget child;
+  final Widget? child;
 
-  static ShimmerState of(BuildContext context) {
+  static ShimmerState? of(BuildContext context) {
     return context.findAncestorStateOfType<ShimmerState>();
   }
 
   Shimmer({
-    Key key,
-    @required this.linearGradient,
+    Key? key,
+    required this.linearGradient,
     this.child,
   });
 
@@ -101,7 +101,7 @@ class Shimmer extends StatefulWidget {
 }
 
 class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
-  AnimationController _shimmerController;
+  AnimationController? _shimmerController;
 
   @override
   void initState() {
@@ -112,7 +112,7 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    _shimmerController.dispose();
+    _shimmerController!.dispose();
     super.dispose();
   }
 
@@ -122,23 +122,23 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
         begin: widget.linearGradient.begin,
         end: widget.linearGradient.end,
         transform: _SlidingGradientTransform(
-          slidePercent: _shimmerController.value,
+          slidePercent: _shimmerController!.value,
         ),
       );
 
-  bool get isSized => (context.findRenderObject() as RenderBox).hasSize ?? false;
+  bool get isSized => (context.findRenderObject() as RenderBox?)?.hasSize ?? false;
 
   Size get size => (context.findRenderObject() as RenderBox).size;
 
   Offset getDescendantOffset({
-    @required RenderBox descendant,
+    required RenderBox descendant,
     Offset offset = Offset.zero,
   }) {
-    final shimmerBox = context.findRenderObject() as RenderBox;
+    final shimmerBox = context.findRenderObject() as RenderBox?;
     return descendant.localToGlobal(offset, ancestor: shimmerBox);
   }
 
-  Listenable get shimmerChanges => _shimmerController;
+  Listenable? get shimmerChanges => _shimmerController;
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ class ImportBloc extends Bloc<ImportEvent, ImportState> {
   @override
   Stream<ImportState> mapEventToState(ImportEvent event) async* {
     if (event is ImportCurrentImport) {
-      Import import = await ImportServices.getCurrentImport() ?? Import.bothNotImported;
+      Import import = await ImportServices.getCurrentImport();
       switch (import) {
         case Import.bothImported:
           yield ImportBothImported();
@@ -27,8 +27,6 @@ class ImportBloc extends Bloc<ImportEvent, ImportState> {
           break;
       }
     } else if (event is ImportConfirm) {
-      await ImportServices.savePrefixIdpel(event.prefixIdPel ?? "");
-
       Import currentImport = await ImportServices.getCurrentImport();
 
       switch (event.import) {
@@ -37,6 +35,7 @@ class ImportBloc extends Bloc<ImportEvent, ImportState> {
         case Import.bothNotImported:
           break;
         case Import.pascabayarImported:
+          await ImportServices.savePrefixIdpelPasca(event.prefixIdPel ?? "");
           if (currentImport == Import.prabayarImported) {
             await ImportServices.saveImport(Import.bothImported);
             yield ImportBothImported();
@@ -46,6 +45,7 @@ class ImportBloc extends Bloc<ImportEvent, ImportState> {
           }
           break;
         case Import.prabayarImported:
+          await ImportServices.savePrefixIdpelPra(event.prefixIdPel ?? '');
           if(currentImport == Import.pascabayarImported) {
             await ImportServices.saveImport(Import.bothImported);
             yield ImportBothImported();

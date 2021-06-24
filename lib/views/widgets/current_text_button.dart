@@ -1,13 +1,13 @@
 part of 'widgets.dart';
 
 class CurrentTextButton extends StatelessWidget {
-  CurrentTextButton({@required this.text, @required this.onTap, this.width, this.decoration, this.textStyle});
+  CurrentTextButton({required this.text, required this.onTap, this.width, this.decoration, this.textStyle});
 
   final Function onTap;
   final String text;
-  final double width;
-  final BoxDecoration decoration;
-  final TextStyle textStyle;
+  final double? width;
+  final BoxDecoration? decoration;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class CurrentTextButton extends StatelessWidget {
         if (stateFontSize is FontSizeResult) {
           return Container(
             width: width ?? double.infinity,
-            height: 41 + stateFontSize.width,
+            height: 41 + stateFontSize.width!,
             decoration: decoration ?? cardDecoration.copyWith(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -34,12 +34,13 @@ class CurrentTextButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(5),
                 splashColor: inkWellSplashColor,
                 hoverColor: inkWellSplashColor.withOpacity(0.5),
-                onTap: onTap,
-                child: Center(child: Text(text, style: textStyle ?? stateFontSize.subtitle.copyWith(color: whiteColor))),
+                onTap: onTap as void Function()?,
+                child: Center(child: Text(text, style: textStyle ?? stateFontSize.subtitle!.copyWith(color: whiteColor))),
               ),
             ),
           );
         }
+        return Container();
       },
     );
   }

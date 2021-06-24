@@ -4,12 +4,12 @@ part of 'font_size_bloc.dart';
 class FontSizeState {}
 
 class FontSizeResult extends FontSizeState {
-  final TextStyle title;
-  final TextStyle subtitle;
-  final TextStyle body1;
-  final TextStyle body2;
+  final TextStyle? title;
+  final TextStyle? subtitle;
+  final TextStyle? body1;
+  final TextStyle? body2;
 
-  final double width;
+  final double? width;
 
   FontSizeResult({
     this.title,

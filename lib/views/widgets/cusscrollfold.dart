@@ -3,14 +3,16 @@ part of 'widgets.dart';
 class CusScrollFold extends StatefulWidget {
   final List<Widget> children;
   final String title;
-  final List<Widget> action;
-  final MyToggleButton myToggleButton;
+  final List<Widget>? action;
+  final MyToggleButton? myToggleButton;
+  final bool isCustomerDataPage;
 
   CusScrollFold({
-    @required this.children,
+    required this.children,
     this.title = '',
     this.action,
     this.myToggleButton,
+    required this.isCustomerDataPage,
   });
 
   @override
@@ -40,12 +42,28 @@ class _CusScrollFoldState extends State<CusScrollFold> {
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 widget.title,
-                                style: stateFontSize.title.copyWith(color: primaryColor),
+                                style: stateFontSize.title!.copyWith(color: primaryColor),
                               ),
                             ),
                             SizedBox(height: 10.0),
-                            if (widget.myToggleButton != null) widget.myToggleButton,
-                            if (stateCustomerData is CustomerDataResult && stateCustomerData.searchResult != null) ...[Text('Hasil Pencarian unuk "${stateCustomerData.searchResult}"')]
+                            if (widget.myToggleButton != null) widget.myToggleButton!,
+                            if (stateCustomerData is CustomerDataResult && stateCustomerData.searchResult != null && widget.isCustomerDataPage) ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Hasil Pencarian untuk "${stateCustomerData.searchResult}" ' + _getColumnCustomerData(context, stateCustomerData)),
+                                  TextButton(
+                                    onPressed: () {
+                                      context.read<CustomerDataBloc>().add(FetchCustomerData());
+                                    },
+                                    child: Text(
+                                      'Batal',
+                                      style: stateFontSize.body2!.copyWith(color: primaryColor),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ]
                           ],
                         ),
                       ),
@@ -73,13 +91,22 @@ class _CusScrollFoldState extends State<CusScrollFold> {
     );
   }
 
-  double _getToolbarHeight(BuildContext context, CustomerDataResult stateCustomerData) {
-    if (widget.myToggleButton != null && stateCustomerData.searchResult != null) {
-      return 96.0;
-    } else if (widget.myToggleButton != null) {
-      return 90.0;
+  double _getToolbarHeight(BuildContext context, CustomerDataState stateCustomerData) {
+    if (stateCustomerData is CustomerDataResult) {
+      if (widget.myToggleButton != null && stateCustomerData.searchResult != null) {
+        return 128.0;
+      } else if (widget.myToggleButton != null) {
+        return 90.0;
+      }
     }
 
     return 56.0;
+  }
+
+  String _getColumnCustomerData(BuildContext context, CustomerDataResult stateCustomerData) {
+    if (stateCustomerData.column != null) {
+      return '(${stateCustomerData.column == columnTarip ? 'Tarif' : stateCustomerData.column})';
+    }
+    return '';
   }
 }

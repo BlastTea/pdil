@@ -6,8 +6,8 @@ class CustomerDataPage extends StatefulWidget {
 }
 
 class _CustomerDataPageState extends State<CustomerDataPage> {
-  List<bool> isExpandPascas;
-  List<bool> isExpandPras;
+  List<bool>? isExpandPascas;
+  List<bool>? isExpandPras;
   int loop = 1;
   bool _isPasca = true;
 
@@ -28,9 +28,10 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                   isExpandPascas = List.generate(stateCustomerData.pdilPasca?.length ?? 0, (index) => false);
                 }
                 if (isExpandPras == null) {
-                  List.generate(stateCustomerData.pdilPra?.length ?? 0, (index) => false);
+                  isExpandPras = List.generate(stateCustomerData.pdilPra?.length ?? 0, (index) => false);
                 }
                 return CusScrollFold(
+                  isCustomerDataPage: true,
                   myToggleButton: MyToggleButton(
                       toggleButtonSlot: ToggleButtonSlot.showData,
                       onTap: (isPasca) {
@@ -47,15 +48,15 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                       icon: Icon(Icons.search),
                       color: primaryColor,
                     ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.filter_alt),
-                      color: primaryColor,
-                    ),
+                    // IconButton(
+                    //   onPressed: () {},
+                    //   icon: Icon(Icons.filter_alt),
+                    //   color: primaryColor,
+                    // ),
                     SizedBox(width: defaultPadding),
                   ],
                   children: List.generate(
-                    _isPasca ? stateCustomerData.pdilPasca.length : stateCustomerData.pdilPra.length,
+                    _isPasca ? stateCustomerData.pdilPasca!.length : stateCustomerData.pdilPra!.length,
                     (index) => AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.fastOutSlowIn,
@@ -67,22 +68,22 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: 5.0),
-                                    ...List.generate(!_isPasca ? 3 : 2, (indexText) {
-                                      if (isExpandPascas[index]) {
-                                        return SingleChildScrollView(
-                                          child: Row(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: 5.0),
+                                      ...List.generate(!_isPasca ? 3 : 2, (indexText) {
+                                        if (_getIsExpand(context, index)) {
+                                          return Row(
                                             children: [
                                               SizedBox(
                                                 width: 70,
@@ -92,152 +93,172 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                                                     _isPasca ? 'Nama' : 'No Meter',
                                                     if (!_isPasca) 'Nama',
                                                   ][indexText],
-                                                  style: stateFontSize.body1.copyWith(color: greyColor),
+                                                  style: stateFontSize.body1!.copyWith(color: greyColor),
                                                 ),
                                               ),
                                               Text(
                                                 ' : ',
-                                                style: stateFontSize.body1.copyWith(color: greyColor),
+                                                style: stateFontSize.body1!.copyWith(color: greyColor),
                                               ),
-                                              Text(
-                                                [
-                                                  _isPasca ? stateCustomerData.pdilPasca[index].idPel : stateCustomerData.pdilPra[index].idPel,
-                                                  _isPasca ? stateCustomerData.pdilPasca[index].nama : stateCustomerData.pdilPra[index].noMeter,
-                                                  if (!_isPasca) stateCustomerData.pdilPra[index].nama,
-                                                ][indexText],
-                                                style: stateFontSize.body1,
+                                              SizedBox(
+                                                width: MediaQuery.of(context).size.width * 0.418,
+                                                child: SingleChildScrollView(
+                                                  scrollDirection: Axis.horizontal,
+                                                  child: Text(
+                                                    [
+                                                      _isPasca ? stateCustomerData.pdilPasca![index].idPel : stateCustomerData.pdilPra![index].idPel,
+                                                      _isPasca ? stateCustomerData.pdilPasca![index].nama : stateCustomerData.pdilPra![index].noMeter,
+                                                      if (!_isPasca) stateCustomerData.pdilPra![index].nama,
+                                                    ][indexText]!,
+                                                    style: stateFontSize.body1,
+                                                    maxLines: 1,
+                                                  ),
+                                                ),
                                               ),
                                             ],
-                                          ),
-                                        );
-                                      } else {
-                                        if (_isPasca) {
-                                          return Text(
-                                            [
-                                              stateCustomerData.pdilPasca[index].idPel,
-                                              stateCustomerData.pdilPasca[index].nama,
-                                            ][indexText],
-                                            style: stateFontSize.body1,
                                           );
-                                        } else if (!_isPasca) {
-                                          return FutureBuilder<bool>(
-                                            future: Future.delayed(const Duration(milliseconds: 200), () {
-                                              return true;
-                                            }),
-                                            builder: (_, snapshot) {
-                                              if (snapshot.hasData) {
-                                                return Text(
-                                                  [
-                                                    stateCustomerData.pdilPra[index].idPel,
-                                                    stateCustomerData.pdilPra[index].noMeter,
-                                                    stateCustomerData.pdilPra[index].nama,
-                                                  ][indexText],
-                                                  style: stateFontSize.body1,
-                                                );
-                                              }
-                                              return Container();
-                                            },
-                                          );
-                                        }
-                                        // return Text(
-                                        //   [
-                                        //     _isPasca ? stateCustomerData.pdilPasca[index].idPel : stateCustomerData.pdilPra[index].idPel,
-                                        //     _isPasca ? stateCustomerData.pdilPasca[index].nama : stateCustomerData.pdilPra[index].noMeter,
-                                        //     if (!_isPasca) stateCustomerData.pdilPra[index].nama,
-                                        //   ][indexText],
-                                        //   style: stateFontSize.body1,
-                                        // );
-                                      }
-                                    })
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Material(
-                                      color: Colors.transparent,
-                                      child: IconButton(
-                                        onPressed: () {
-                                          context.read<PdilBloc>().add(FetchPdil(stateCustomerData.pdilPasca[index].idPel, isContinuingSearch: true, isFromCustomerData: true));
-                                          context.read<BottomNavigationBloc>()..add(ChangeCurrentNav(1));
-                                        },
-                                        icon: Icon(Icons.edit),
-                                      ),
-                                    ),
-                                    Material(
-                                      color: Colors.transparent,
-                                      child: ExpandIcon(
-                                        color: primaryColor,
-                                        isExpanded: _getIsExpand(context, index),
-                                        onPressed: (newValue) {
-                                          setState(() {
-                                            isExpandPascas[index] = !isExpandPascas[index];
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            if (isExpandPascas[index])
-                              ...List.generate(
-                                8,
-                                (indexFuture) => FutureBuilder<bool>(
-                                  future: Future.delayed(const Duration(milliseconds: 200), () {
-                                    return true;
-                                  }),
-                                  builder: (_, snapshot) {
-                                    if (snapshot.hasData) {
-                                      return Row(
-                                        children: [
-                                          SizedBox(
-                                            width: 70,
-                                            child: Text(
+                                        } else {
+                                          if (_isPasca) {
+                                            return Text(
                                               [
-                                                'Alamat',
-                                                'Tarif',
-                                                'Daya',
-                                                'No Hp',
-                                                'Nik',
-                                                'Npwp',
-                                                'Email',
-                                                'Catatan',
-                                              ][indexFuture],
-                                              style: stateFontSize.body1.copyWith(color: greyColor),
-                                            ),
-                                          ),
-                                          Text(
-                                            ' : ',
-                                            style: stateFontSize.body1.copyWith(
-                                              color: greyColor,
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
+                                                stateCustomerData.pdilPasca![index].idPel,
+                                                stateCustomerData.pdilPasca![index].nama,
+                                              ][indexText]!,
+                                              style: stateFontSize.body1,
+                                            );
+                                          } else if (!_isPasca) {
+                                            return FutureBuilder<bool>(
+                                              future: Future.delayed(const Duration(milliseconds: 200), () {
+                                                return true;
+                                              }),
+                                              builder: (_, snapshot) {
+                                                if (snapshot.hasData) {
+                                                  return Text(
+                                                    [
+                                                      stateCustomerData.pdilPra![index].idPel,
+                                                      stateCustomerData.pdilPra![index].noMeter,
+                                                      stateCustomerData.pdilPra![index].nama,
+                                                    ][indexText]!,
+                                                    style: stateFontSize.body1,
+                                                  );
+                                                }
+                                                return Container();
+                                              },
+                                            );
+                                          }
+                                          // return Text(
+                                          //   [
+                                          //     _isPasca ? stateCustomerData.pdilPasca[index].idPel : stateCustomerData.pdilPra[index].idPel,
+                                          //     _isPasca ? stateCustomerData.pdilPasca[index].nama : stateCustomerData.pdilPra[index].noMeter,
+                                          //     if (!_isPasca) stateCustomerData.pdilPra[index].nama,
+                                          //   ][indexText],
+                                          //   style: stateFontSize.body1,
+                                          // );
+                                        }
+                                        return Container();
+                                      }) 
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Material(
+                                        color: Colors.transparent,
+                                        child: IconButton(
+                                          onPressed: () {
+                                            ToggleButtonServices.saveInputData(_isPasca);
+                                            context.read<PdilBloc>().add(
+                                                  FetchPdil(
+                                                    idPel: _isPasca ? stateCustomerData.pdilPasca![index].idPel : stateCustomerData.pdilPra![index].idPel,
+                                                    isContinuingSearch: true,
+                                                    isFromCustomerData: true,
+                                                    isPasca: _isPasca,
+                                                  ),
+                                                );
+                                            context.read<BottomNavigationBloc>()..add(ChangeCurrentNav(1));
+                                          },
+                                          icon: Icon(Icons.edit),
+                                        ),
+                                      ),
+                                      Material(
+                                        color: Colors.transparent,
+                                        child: ExpandIcon(
+                                          color: primaryColor,
+                                          isExpanded: _getIsExpand(context, index),
+                                          onPressed: (newValue) {
+                                            setState(() {
+                                              if (_isPasca) {
+                                                isExpandPascas![index] = !isExpandPascas![index];
+                                              } else {
+                                                isExpandPras![index] = !isExpandPras![index];
+                                              }
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              if (_getIsExpand(context, index))
+                                ...List.generate(
+                                  8,
+                                  (indexFuture) => FutureBuilder<bool>(
+                                    future: Future.delayed(const Duration(milliseconds: 200), () {
+                                      return true;
+                                    }),
+                                    builder: (_, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Row(
+                                          children: [
+                                            SizedBox(
+                                              width: 70,
                                               child: Text(
                                                 [
-                                                  stateCustomerData.pdilPasca[index].alamat ?? '',
-                                                  stateCustomerData.pdilPasca[index].tarip ?? '',
-                                                  stateCustomerData.pdilPasca[index].daya ?? '',
-                                                  stateCustomerData.pdilPasca[index].noHp ?? '',
-                                                  stateCustomerData.pdilPasca[index].nik ?? '',
-                                                  stateCustomerData.pdilPasca[index].npwp ?? '',
-                                                  stateCustomerData.pdilPasca[index].email ?? '',
-                                                  stateCustomerData.pdilPasca[index].catatan ?? '',
+                                                  'Alamat',
+                                                  'Tarif',
+                                                  'Daya',
+                                                  'No Hp',
+                                                  'Nik',
+                                                  'Npwp',
+                                                  'Email',
+                                                  'Catatan',
                                                 ][indexFuture],
-                                                style: stateFontSize.body1,
+                                                style: stateFontSize.body1!.copyWith(color: greyColor),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      );
-                                    }
-                                    return Container();
-                                  },
+                                            Text(
+                                              ' : ',
+                                              style: stateFontSize.body1!.copyWith(
+                                                color: greyColor,
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: SingleChildScrollView(
+                                                scrollDirection: Axis.horizontal,
+                                                child: Text(
+                                                  [
+                                                    stateCustomerData.pdilPasca![index].alamat ?? '',
+                                                    stateCustomerData.pdilPasca![index].tarip ?? '',
+                                                    stateCustomerData.pdilPasca![index].daya ?? '',
+                                                    stateCustomerData.pdilPasca![index].noHp ?? '',
+                                                    stateCustomerData.pdilPasca![index].nik ?? '',
+                                                    stateCustomerData.pdilPasca![index].npwp ?? '',
+                                                    stateCustomerData.pdilPasca![index].email ?? '',
+                                                    stateCustomerData.pdilPasca![index].catatan ?? '',
+                                                  ][indexFuture],
+                                                  style: stateFontSize.body1,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      }
+                                      return Container();
+                                    },
+                                  ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -254,7 +275,7 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
   }
 
   double _getHeightIsExpand(BuildContext context, int index) {
-    if (isExpandPascas[index]) {
+    if (_getIsExpand(context, index)) {
       if (_isPasca) {
         return 225;
       }
@@ -270,16 +291,20 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
   }
 
   bool _getIsExpand(BuildContext context, int index) {
-    return isExpandPascas[index];
+    if (_isPasca) {
+      return isExpandPascas![index];
+    } else {
+      return isExpandPras![index];
+    }
   }
 
   double _getBottomMargin(BuildContext context, int index, CustomerDataResult stateCustomerData) {
     if (_isPasca) {
-      if (index == (stateCustomerData.pdilPasca.length - 1)) {
+      if (index == (stateCustomerData.pdilPasca!.length - 1)) {
         return 30.0;
       }
     } else {
-      if (index == (stateCustomerData.pdilPra.length - 1)) {
+      if (index == (stateCustomerData.pdilPra!.length - 1)) {
         return 30.0;
       }
     }

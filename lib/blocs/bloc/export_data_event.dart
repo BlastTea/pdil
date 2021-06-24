@@ -9,8 +9,8 @@ class ExportDataExport extends ExportDataEvent {
   final String message;
 
   ExportDataExport({
-    @required this.row,
-    @required this.maxRow,
-    @required this.message,
+    required this.row,
+    required this.maxRow,
+    required this.message,
   });
 }

@@ -1,14 +1,14 @@
 part of 'widgets.dart';
 
-Animation<double> _animationClipper;
+Animation<double>? _animationClipper;
 
 class ClippedBottomBar extends StatefulWidget {
   List<ClippedBottomBarItem> items;
-  Function(int index) onTap;
-  int index;
+  Function(int index)? onTap;
+  int? index;
 
   ClippedBottomBar({
-    @required this.items,
+    required this.items,
     this.onTap,
     this.index,
   });
@@ -18,13 +18,13 @@ class ClippedBottomBar extends StatefulWidget {
 }
 
 class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProviderStateMixin {
-  AnimationController _controllerClipper;
-  List<AnimationController> _animationControllers;
+  late AnimationController _controllerClipper;
+  late List<AnimationController> _animationControllers;
 
-  List<Animation<double>> _animationIconCircles;
-  List<Animation<double>> _animations;
+  late List<Animation<double>?> _animationIconCircles;
+  late List<Animation<double>?> _animations;
 
-  int _previousIndex;
+  int? _previousIndex;
 
   @override
   void initState() {
@@ -50,9 +50,9 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _animations[widget.index] = Tween<double>(begin: 0.0, end: 1.0).animate(_animationControllers[widget.index]);
-    _animationIconCircles[widget.index] = Tween<double>(begin: -1.5, end: 1.0).animate(_animationControllers[widget.index]);
-    _animationControllers[widget.index].forward();
+    _animations[widget.index!] = Tween<double>(begin: 0.0, end: 1.0).animate(_animationControllers[widget.index!]);
+    _animationIconCircles[widget.index!] = Tween<double>(begin: -1.5, end: 1.0).animate(_animationControllers[widget.index!]);
+    _animationControllers[widget.index!].forward();
   }
 
   @override
@@ -93,7 +93,7 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
                         animation: _animationControllers[index],
                         builder: (_, child) {
                           return Transform(
-                            transform: Matrix4.translationValues(0.0, -30.0 * (_animations[index] != null ? _animations[index].value : 0.0), 0.0),
+                            transform: Matrix4.translationValues(0.0, -30.0 * (_animations[index] != null ? _animations[index]!.value : 0.0), 0.0),
                             child: child,
                           );
                         },
@@ -104,7 +104,7 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
                 ),
               ),
               Transform(
-                transform: Matrix4.translationValues((_animationClipper != null ? _animationClipper.value : size.width / 2 - 35) + 10, -30, 0.0),
+                transform: Matrix4.translationValues((_animationClipper != null ? _animationClipper!.value : size.width / 2 - 35) + 10, -30, 0.0),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -126,7 +126,7 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
                     builder: (_, child) {
                       return Transform(
                         transform: Matrix4.translationValues(
-                            0.0, -17.5 * (_animationIconCircles[index] != null ? _animationIconCircles[index].value : -1.5), 0.0),
+                            0.0, -17.5 * (_animationIconCircles[index] != null ? _animationIconCircles[index]!.value : -1.5), 0.0),
                         child: child,
                       );
                     },
@@ -161,7 +161,7 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
                           animation: _animationControllers[index],
                           builder: (_, child) {
                             return Transform(
-                              transform: Matrix4.translationValues(0.0, -30.0 * (_animations[index] != null ? _animations[index].value : 0.0), 0.0),
+                              transform: Matrix4.translationValues(0.0, -30.0 * (_animations[index] != null ? _animations[index]!.value : 0.0), 0.0),
                               child: child,
                             );
                           },
@@ -179,7 +179,7 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
     );
   }
 
-  _getBottomClipper(BuildContext context, int index) {
+  _getBottomClipper(BuildContext context, int? index) {
     final Size size = MediaQuery.of(context).size;
     switch (index) {
       case 0:
@@ -195,13 +195,13 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
   }
 
   _animateClipper(BuildContext context, int index) {
-    widget.onTap(index);
+    widget.onTap!(index);
     _animations[index] = Tween<double>(begin: 0.0, end: 1.0).animate(_animationControllers[index]);
     _animationIconCircles[index] = Tween<double>(begin: -1.5, end: 1.0).animate(_animationControllers[index]);
     _animationClipper =
         Tween<double>(begin: _getBottomClipper(context, _previousIndex), end: _getBottomClipper(context, index)).animate(_controllerClipper);
     _animationControllers[index].forward();
-    _animationControllers[_previousIndex].reverse();
+    _animationControllers[_previousIndex!].reverse();
     _controllerClipper.addListener(() {
       if (_controllerClipper.isCompleted) {
         _animationClipper = Tween<double>(
@@ -221,7 +221,7 @@ class BottomBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     Path path = Path();
-    path.arcTo(Rect.fromLTWH(_animationClipper != null ? _animationClipper.value : size.width / 2 - 35, -30, 70, 60), pi, -pi, true);
+    path.arcTo(Rect.fromLTWH(_animationClipper != null ? _animationClipper!.value : size.width / 2 - 35, -30, 70, 60), pi, -pi, true);
     path.lineTo(size.width, -50);
     path.lineTo(size.width, size.height);
     path.lineTo(0, size.height);
@@ -255,8 +255,8 @@ class BottomBarPainter extends CustomPainter {
       20,
       0,
     );
-    path.lineTo(_animationClipper != null ? _animationClipper.value : size.width / 2 - 35, 0);
-    path.arcTo(Rect.fromLTWH(_animationClipper != null ? _animationClipper.value : size.width / 2 - 35, -30, 70, 60), pi, -pi, true);
+    path.lineTo(_animationClipper != null ? _animationClipper!.value : size.width / 2 - 35, 0);
+    path.arcTo(Rect.fromLTWH(_animationClipper != null ? _animationClipper!.value : size.width / 2 - 35, -30, 70, 60), pi, -pi, true);
     path.lineTo(size.width - 20, 0);
     path.cubicTo(
       size.width - 10,

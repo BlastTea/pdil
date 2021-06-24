@@ -1,24 +1,20 @@
 part of 'services.dart';
 
 class ImportServices {
-  static SharedPreferences _sharedPref;
+  static late SharedPreferences _sharedPref;
 
   static Future<Import> getCurrentImport() async {
     _sharedPref = await SharedPreferences.getInstance();
-    String value = _sharedPref.getString("import");
+    String? value = _sharedPref.getString("import");
     switch (value) {
       case 'both':
         return Import.bothImported;
-        break;
       case 'bothNotImported':
         return Import.bothNotImported;
-        break;
       case 'pascabayar':
         return Import.pascabayarImported;
-        break;
       case 'prabayar':
         return Import.prabayarImported;
-        break;
       default:
         return Import.bothNotImported;
     }
@@ -26,7 +22,7 @@ class ImportServices {
 
   static Future<void> saveImport(Import import) async {
     _sharedPref = await SharedPreferences.getInstance();
-    String value;
+    late String value;
     switch (import) {
       case Import.bothImported:
         value = 'both';
@@ -44,17 +40,27 @@ class ImportServices {
     await _sharedPref.setString("import", value);
   }
 
-  static Future<String> getPrefixIdpel() async {
+  static Future<String?> getPrefixIdpelPasca() async {
     _sharedPref = await SharedPreferences.getInstance();
-    return _sharedPref.getString("idPel");
+    return _sharedPref.getString("idPelPasca");
   }
 
-  static Future<void> savePrefixIdpel(String idPel) async {
+  static Future<void> savePrefixIdpelPasca(String idPel) async {
     _sharedPref = await SharedPreferences.getInstance();
-    await _sharedPref.setString("idPel", idPel);
+    await _sharedPref.setString("idPelPasca", idPel);
   }
 
-  static Future<List<String>> getListFormat() async {
+  static Future<String?> getPrefixIdpelPra() async {
+    _sharedPref = await SharedPreferences.getInstance();
+    return _sharedPref.getString('idPelPra');
+  }
+
+  static Future<void> savePrefixIdpelPra(String idPel) async {
+    _sharedPref = await SharedPreferences.getInstance();
+    await _sharedPref.setString('idPelPra', idPel);
+  }
+
+  static Future<List<String>?> getListFormat() async {
     _sharedPref = await SharedPreferences.getInstance();
     return _sharedPref.getStringList("format");
   }

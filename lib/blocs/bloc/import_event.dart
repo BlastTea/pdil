@@ -7,7 +7,7 @@ class ImportCurrentImport extends ImportEvent {}
 
 class ImportConfirm extends ImportEvent {
   final Import import;
-  final String prefixIdPel;
+  final String? prefixIdPel;
 
   ImportConfirm(this.import, {this.prefixIdPel});
 }

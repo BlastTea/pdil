@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => FabSaveBloc()),
         BlocProvider(create: (_) => FabBloc()),
         BlocProvider(create: (_) => CustomerDataBloc()),
+        BlocProvider(create: (_) => ToggleButtonBloc()),
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,

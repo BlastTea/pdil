@@ -8,3 +8,4 @@ export 'bloc/bottom_navigation_bloc.dart';
 export 'bloc/fab_save_bloc.dart';
 export 'bloc/fab_bloc.dart';
 export 'bloc/customer_data_bloc.dart';
+export 'bloc/toggle_button_bloc.dart';

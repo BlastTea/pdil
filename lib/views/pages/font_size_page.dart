@@ -19,7 +19,7 @@ class _FontSizePageState extends State<FontSizePage> {
           ? Scaffold(
               appBar: AppBar(
                 title: Text("Ukuran Font",
-                    style: stateFontSize.title.copyWith(color: whiteColor, fontWeight: FontWeight.w600)),
+                    style: stateFontSize.title!.copyWith(color: whiteColor, fontWeight: FontWeight.w600)),
               ),
               body: Column(
                 children: [
@@ -32,11 +32,11 @@ class _FontSizePageState extends State<FontSizePage> {
                         RichText(
                           text: TextSpan(
                             text: "Memperbesar",
-                            style: stateFontSize.subtitle.copyWith(color: blackColor),
+                            style: stateFontSize.subtitle!.copyWith(color: blackColor),
                             children: [
                               TextSpan(
                                 text: " Geser Slider ke kanan",
-                                style: stateFontSize.body1.copyWith(color: blackColor),
+                                style: stateFontSize.body1!.copyWith(color: blackColor),
                               ),
                             ],
                           ),
@@ -45,11 +45,11 @@ class _FontSizePageState extends State<FontSizePage> {
                         RichText(
                           text: TextSpan(
                             text: "Memperkecil",
-                            style: stateFontSize.subtitle.copyWith(color: blackColor),
+                            style: stateFontSize.subtitle!.copyWith(color: blackColor),
                             children: [
                               TextSpan(
                                 text: " Geser Slider ke kiri",
-                                style: stateFontSize.body1.copyWith(color: blackColor),
+                                style: stateFontSize.body1!.copyWith(color: blackColor),
                               ),
                             ],
                           ),

@@ -1,26 +1,26 @@
 part of 'widgets.dart';
 
 class CurrentTextField extends StatefulWidget {
-  final TextEditingController controller;
-  final String label;
-  final String prefixText;
-  final String hintText;
-  final bool readOnly;
+  final TextEditingController? controller;
+  final String? label;
+  final String? prefixText;
+  final String? hintText;
+  final bool? readOnly;
   final bool expands;
   final bool isInputPage;
-  final double width;
-  final double height;
-  final BorderRadiusGeometry borderRadius;
-  final ScrollController scrollController;
-  final TextInputType keyboardType;
-  final Function(String text) onSubmitted;
-  final Function(String text) onChanged;
-  final Function onCancelTap;
-  final TextInputAction textInputAction;
-  final int maxLines;
-  final int minLines;
-  final EdgeInsetsGeometry padding;
-  final Widget prefixIcon;
+  final double? width;
+  final double? height;
+  final BorderRadiusGeometry? borderRadius;
+  final ScrollController? scrollController;
+  final TextInputType? keyboardType;
+  final Function(String text)? onSubmitted;
+  final Function(String text)? onChanged;
+  final Function? onCancelTap;
+  final TextInputAction? textInputAction;
+  final int? maxLines;
+  final int? minLines;
+  final EdgeInsetsGeometry? padding;
+  final Widget? prefixIcon;
 
   CurrentTextField({
     this.controller,
@@ -50,9 +50,9 @@ class CurrentTextField extends StatefulWidget {
 }
 
 class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
+  late AnimationController _animationController;
 
-  Animation<double> _animation;
+  late Animation<double> _animation;
 
   @override
   void initState() {
@@ -62,9 +62,11 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
       duration: const Duration(milliseconds: 300),
     );
     _animation = Tween<double>(begin: -2.5, end: 1.0).animate(_animationController);
-    widget.controller?.addListener(() {
-      if (widget.controller.text != '' && widget.onCancelTap != null) {
+    widget.controller!.addListener(() {
+      if (widget.controller!.text != '' && widget.onCancelTap != null) {
         _animationController.forward();
+      } else if (widget.controller!.text == '' && widget.onCancelTap != null) {
+        _animationController.reverse();
       }
     });
   }
@@ -80,18 +82,18 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
             children: [
               Container(
                 width: widget.width ?? double.infinity,
-                height: (widget.height ?? 40) + (stateFontSize.title.fontSize - 20),
+                height: (widget.height ?? 40) + (stateFontSize.title!.fontSize! - 20),
                 decoration: cardDecoration,
                 child: TextField(
                   textInputAction: widget.textInputAction,
                   onSubmitted: widget.onSubmitted,
                   onChanged: (value) {
-                    if (widget.controller.text != '' && widget.onCancelTap != null) {
+                    if (widget.controller!.text != '' && widget.onCancelTap != null) {
                       _animationController.forward();
-                    } else if (widget.controller.text == '' && widget.onCancelTap != null) {
+                    } else if (widget.controller!.text == '' && widget.onCancelTap != null) {
                       _animationController.reverse();
                     }
-                    widget.onChanged(value);
+                    widget.onChanged!(value);
                   },
                   keyboardType: widget.keyboardType,
                   scrollController: widget.scrollController,
@@ -110,27 +112,15 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
                     labelText: widget.label,
                     labelStyle: stateFontSize.subtitle,
                     hintText: widget.hintText,
-                    hintStyle: stateFontSize.body1.copyWith(color: greyColor),
-                    // disabledBorder: OutlineInputBorder(
-                    //   borderRadius: widget.borderRadius ?? BorderRadius.circular(5),
-                    //   borderSide: BorderSide(
-                    //     color: primaryColor,
-                    //   ),
-                    // ),
-                    // enabledBorder: OutlineInputBorder(
-                    //   borderRadius: widget.borderRadius ?? BorderRadius.circular(5),
-                    //   borderSide: BorderSide(
-                    //     color: primaryColor,
-                    //   ),
-                    // ),
+                    hintStyle: stateFontSize.body1!.copyWith(color: greyColor),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: widget.borderRadius ?? BorderRadius.circular(5),
+                      borderRadius: widget.borderRadius as BorderRadius? ?? BorderRadius.circular(5),
                       borderSide: BorderSide(
                         color: primaryColor,
                       ),
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: widget.borderRadius ?? BorderRadius.circular(5),
+                      borderRadius: widget.borderRadius as BorderRadius? ?? BorderRadius.circular(5),
                       borderSide: BorderSide(
                         color: primaryColor,
                       ),
@@ -142,11 +132,8 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
                 BlocListener<PdilBloc, PdilState>(
                   listener: (_, statePdil) {
                     if (widget.isInputPage && statePdil is PdilClearedState) {
-                      if (widget.controller.text == '' && widget.onCancelTap != null) {
-                        _animationController.reverse();
-                      }
                       Future.delayed(const Duration(milliseconds: 100)).then((value) {
-                        if (widget.controller.text == '' && widget.onCancelTap != null) {
+                        if (widget.controller!.text == '' && widget.onCancelTap != null) {
                           _animationController.reverse();
                         }
                       });
@@ -154,11 +141,11 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
                   },
                   child: AnimatedBuilder(
                     animation: _animationController,
-                    builder: (_, child) => Positioned(right: 10 * _animation.value, child: child),
+                    builder: (_, child) => Positioned(right: 10 * _animation.value, child: child!),
                     child: GestureDetector(
                       onTap: () {
-                        widget.onCancelTap();
-                        if (widget.controller.text == '' && widget.onCancelTap != null) {
+                        widget.onCancelTap!();
+                        if (widget.controller!.text == '' && widget.onCancelTap != null) {
                           _animationController.reverse();
                         }
                       },

@@ -16,3 +16,4 @@ part 'import_services.dart';
 part 'font_size_services.dart';
 part 'input_service.dart';
 part 'search_services.dart';
+part 'toggle_button_services.dart';

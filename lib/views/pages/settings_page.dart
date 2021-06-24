@@ -2,7 +2,7 @@ part of 'pages.dart';
 
 class SettingsPage extends StatefulWidget {
   final bool isImport;
-  final Changing data;
+  final Changing? data;
   SettingsPage({this.isImport = false, this.data});
 
   @override
@@ -18,8 +18,8 @@ class _SettingsPageState extends State<SettingsPage> {
   DbPasca _dbPasca = DbPasca();
   DbPra _dbPra = DbPra();
 
-  Sheet sheetPasca;
-  Sheet sheetPra;
+  Sheet? sheetPasca;
+  Sheet? sheetPra;
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +119,7 @@ class _SettingsPageState extends State<SettingsPage> {
           return BlocBuilder<ImportBloc, ImportState>(
             builder: (_, stateImport) {
               return CusScrollFold(
+                isCustomerDataPage: false,
                 title: 'Pengaturan',
                 children: [
                   _listFontSize(context, stateFontSize),
@@ -163,7 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ],
         ),
-        title: Text("Ukuran Font", style: stateFontSize.subtitle.copyWith(fontWeight: FontWeight.w600)),
+        title: Text("Ukuran Font", style: stateFontSize.subtitle!.copyWith(fontWeight: FontWeight.w600)),
         onTap: () async {
           double value = await FontSizeServices.getFontSize() ?? 0;
           if (value != 0) {
@@ -195,7 +196,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         title: Text(
           'Import',
-          style: stateFontSize.subtitle.copyWith(fontWeight: FontWeight.w600),
+          style: stateFontSize.subtitle!.copyWith(fontWeight: FontWeight.w600),
         ),
         onTap: () {
           NavigationHelper.to(
@@ -221,7 +222,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         title: Text(
           isExport ? 'Export Data Ke Excel' : "Simpan",
-          style: stateFontSize.subtitle.copyWith(color: isExport ? redColor : blackColor, fontWeight: FontWeight.w600),
+          style: stateFontSize.subtitle!.copyWith(color: isExport ? redColor : blackColor, fontWeight: FontWeight.w600),
         ),
         onTap: () {
           _exportDialog(context, stateFontSize, isExport: isExport);
@@ -246,7 +247,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 CheckboxIsExportBoth(
                   isExportBoth: _isExportBoth,
                   onChanged: (newValue) {
-                    _isExportBoth = newValue;
+                    _isExportBoth = newValue!;
                   },
                   stateFontSize: stateFontSize,
                 ),
@@ -273,7 +274,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   CurrentTextButton(
                     width: MediaQuery.of(context).size.width / 2 - 30,
                     text: 'Batal',
-                    textStyle: stateFontSize.subtitle.copyWith(color: primaryColor),
+                    textStyle: stateFontSize.subtitle!.copyWith(color: primaryColor),
                     decoration: cardDecoration.copyWith(
                       border: Border.all(color: primaryColor),
                     ),
@@ -293,7 +294,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             context: context,
                             builder: (_) => AlertDialog(
                                   title: Text("Apakah Anda yakin ?",
-                                      style: stateFontSize.title.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
+                                      style: stateFontSize.title!.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
                                   content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
                                   actions: [
                                     TextButton(
@@ -362,8 +363,8 @@ class _SettingsPageState extends State<SettingsPage> {
         sheetPra = excel['Prabayar'];
 
         print('mengambil data...Both');
-        pdilPasca = await _dbPasca.getPdilList();
-        pdilPra = await _dbPra.getPdilList();
+        pdilPasca = (await _dbPasca.getPdilList())!;
+        pdilPra = (await _dbPra.getPdilList())!;
 
         print('mengeksport data...Both');
         _appendPasca(context, pdilPasca: pdilPasca, pascaRow: pascaRow);
@@ -371,30 +372,32 @@ class _SettingsPageState extends State<SettingsPage> {
       } else if (_isPasca) {
         sheetPasca = excel['Pascabayar'];
         print('mengambil data...Pascabayar');
-        pdilPasca = await _dbPasca.getPdilList();
+        pdilPasca = (await _dbPasca.getPdilList())!;
         print('mengeksport data...Pascabayar');
         _appendPasca(context, pdilPasca: pdilPasca, pascaRow: pascaRow);
       } else if (!_isPasca) {
         sheetPra = excel['Prabayar'];
         print('mengambil data...prabayar');
-        pdilPra = await _dbPra.getPdilList();
+        pdilPra = (await _dbPra.getPdilList())!;
         print('mengeksport data...prabayar');
         _appendPra(context, pdilPra: pdilPra, praRow: praRow);
       }
 
-      List<Directory> listDirectory = await getExternalStorageDirectories(type: StorageDirectory.downloads);
+      List<Directory>? listDirectory = await getExternalStorageDirectories(type: StorageDirectory.downloads);
 
-      excel.encode().then((value) async {
-        var file = File(listDirectory[0].path + '/$namaFile.xlsx');
+      // excel.encode().then((value) async {
+      //   var file = File(listDirectory[0].path + '/$namaFile.xlsx');
 
-        await file.create(recursive: true);
+      //   await file.create(recursive: true);
 
-        file.writeAsBytesSync(value);
-      });
+      //   file.writeAsBytesSync(value);
+      // });
+
+      var data = await excel.save();
     } catch (_) {} finally {}
   }
 
-  _loadingExport({@required BuildContext context, @required FontSizeResult stateFontSize, @required bool isExport}) => NavigationHelper.to(
+  _loadingExport({required BuildContext context, required FontSizeResult stateFontSize, required bool isExport}) => NavigationHelper.to(
         PageRouteBuilder(
           barrierColor: blackColor.withOpacity(0.5),
           barrierDismissible: false,
@@ -471,7 +474,6 @@ class _SettingsPageState extends State<SettingsPage> {
         break;
       case Import.bothNotImported:
         return Import.bothNotImported;
-        break;
       case Import.pascabayarImported:
         if (_isPasca) {
           return Import.bothNotImported;
@@ -486,31 +488,31 @@ class _SettingsPageState extends State<SettingsPage> {
     return Import.bothNotImported;
   }
 
-  _appendPasca(BuildContext context, {@required List<Pdil> pdilPasca, @required List<String> pascaRow}) {
+  _appendPasca(BuildContext context, {required List<Pdil> pdilPasca, required List<String> pascaRow}) {
     int counterPasca = 0;
     pdilPasca.forEach((row) {
       if (counterPasca < 1) {
-        sheetPasca.appendRow(pascaRow);
+        sheetPasca!.appendRow(pascaRow);
       }
       counterPasca++;
       context.read<ExportDataBloc>().add(ExportDataExport(row: counterPasca, maxRow: pdilPasca.length, message: 'Mengeksport Pascabayar'));
 
-      sheetPasca.appendRow(
+      sheetPasca!.appendRow(
         row.toList(isPasca: true),
       );
     });
   }
 
-  _appendPra(BuildContext context, {@required List<Pdil> pdilPra, @required List<String> praRow}) {
+  _appendPra(BuildContext context, {required List<Pdil> pdilPra, required List<String> praRow}) {
     int counterPra = 0;
     pdilPra.forEach((row) {
       if (counterPra < 1) {
-        sheetPra.appendRow(praRow);
+        sheetPra!.appendRow(praRow);
       }
       counterPra++;
       context.read<ExportDataBloc>().add(ExportDataExport(row: counterPra, maxRow: pdilPra.length, message: 'Mengeksport Prabayar'));
 
-      sheetPra.appendRow(
+      sheetPra!.appendRow(
         row.toList(isPasca: false),
       );
     });
@@ -518,7 +520,7 @@ class _SettingsPageState extends State<SettingsPage> {
 }
 
 class MySlider extends StatefulWidget {
-  double value;
+  double? value;
 
   MySlider({
     this.value,
@@ -545,17 +547,17 @@ class _MySliderState extends State<MySlider> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text('A', style: body2),
-                Text('A', style: title.copyWith(fontSize: title.fontSize + 10)),
+                Text('A', style: title.copyWith(fontSize: title.fontSize! + 10)),
               ],
             ),
           ),
         ),
         Slider(
-          value: widget.value,
+          value: widget.value!,
           min: 0,
           max: 4,
           divisions: 4,
-          label: '${(defaultValue + widget.value * 2).toString().split(".")[0]}',
+          label: '${(defaultValue + widget.value! * 2).toString().split(".")[0]}',
           onChanged: (_value) {
             setState(() {
               widget.value = _value;
@@ -570,11 +572,11 @@ class _MySliderState extends State<MySlider> {
 }
 
 class CheckboxIsExportBoth extends StatefulWidget {
-  bool isExportBoth;
-  Function(bool newValue) onChanged;
-  FontSizeResult stateFontSize;
+  bool? isExportBoth;
+  Function(bool? newValue) onChanged;
+  FontSizeResult? stateFontSize;
 
-  CheckboxIsExportBoth({@required this.isExportBoth, @required this.onChanged, this.stateFontSize});
+  CheckboxIsExportBoth({required this.isExportBoth, required this.onChanged, this.stateFontSize});
 
   @override
   _CheckboxIsExportBothState createState() => _CheckboxIsExportBothState();
@@ -596,7 +598,7 @@ class _CheckboxIsExportBothState extends State<CheckboxIsExportBoth> {
               });
             },
           ),
-          Text('Export keduanya', style: widget.stateFontSize.body1),
+          Text('Export keduanya', style: widget.stateFontSize!.body1),
         ],
       ),
     );

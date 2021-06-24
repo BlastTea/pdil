@@ -12,15 +12,15 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       body: BlocBuilder<FontSizeBloc, FontSizeState>(
         builder: (_, stateFontSize) => (stateFontSize is FontSizeResult)
             ? BlocBuilder<ImportBloc, ImportState>(builder: (_, importState) {
-                return FutureBuilder(
+                return FutureBuilder<bool>(
                   future: Future(() async {
                     await Future.delayed(Duration(seconds: 2));
                     return true;
                   }),
                   builder: (_, snap) {
-                    if (snap.hasData && snap.data) {
+                    if (snap.hasData && snap.data!) {
                       if (importState is ImportBothNotImported) {
-                        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
                           NavigationHelper.to(PageRouteBuilder(
                             pageBuilder: (_, __, ___) => ImportPage(),
                             barrierDismissible: false,
@@ -49,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                 Text(
                                   "Penataan Data Induk Langganan",
                                   style:
-                                      stateFontSize.subtitle.copyWith(color: primaryColor, fontWeight: FontWeight.w600),
+                                      stateFontSize.subtitle!.copyWith(color: primaryColor, fontWeight: FontWeight.w600),
                                 )
                               ],
                             ),

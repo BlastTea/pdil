@@ -10,15 +10,15 @@ TextStyle title = defaultStyle.copyWith(
 );
 
 TextStyle subtitle = defaultStyle.copyWith(
-  fontSize: title.fontSize - 6,
+  fontSize: title.fontSize! - 6,
 );
 
 TextStyle body1 = defaultStyle.copyWith(
-  fontSize: subtitle.fontSize - 4,
+  fontSize: subtitle.fontSize! - 4,
 );
 
 TextStyle body2 = defaultStyle.copyWith(
-  fontSize: subtitle.fontSize - 2,
+  fontSize: subtitle.fontSize! - 2,
 );
 
 const String loremIpsum =
@@ -26,9 +26,9 @@ const String loremIpsum =
 
 showMySnackBar(
   BuildContext context, {
-  @required String text,
-  Duration duration,
-  Function onPressed,
+  required String text,
+  Duration? duration,
+  Function? onPressed,
 }) =>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -39,7 +39,7 @@ showMySnackBar(
         duration: duration ?? Duration(seconds: 5),
         action: SnackBarAction(
           label: "Ok",
-          onPressed: onPressed ?? () {},
+          onPressed: onPressed as void Function()? ?? () {},
         ),
       ),
     );

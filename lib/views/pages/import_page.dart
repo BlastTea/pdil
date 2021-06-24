@@ -6,17 +6,17 @@ class ImportPage extends StatefulWidget {
 }
 
 class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
+  late AnimationController _animationController;
 
-  Animation<Offset> _animation;
+  late Animation<Offset> _animation;
 
   bool _isPasca = true;
 
-  DateTime _currentBackPressTime;
+  DateTime? _currentBackPressTime;
 
-  FilePickerResult result;
+  FilePickerResult? result;
   String directory = "";
-  String message;
+  String? message;
   DbPasca dbHelper = DbPasca();
   final List<List<String>> formatChecks = [
     ['IDPEL'],
@@ -41,7 +41,7 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 500),
     );
     _animation = Tween<Offset>(begin: Offset(0.0, 1.0), end: Offset(0.0, 0.0)).animate(_animationController);
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       _animationController.forward();
     });
   }
@@ -59,13 +59,13 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
         Import currentImport = await ImportServices.getCurrentImport();
         DateTime now = DateTime.now();
         if (currentImport == Import.bothNotImported) {
-          if (_currentBackPressTime == null || now.difference(_currentBackPressTime) > Duration(seconds: 2)) {
+          if (_currentBackPressTime == null || now.difference(_currentBackPressTime!) > Duration(seconds: 2)) {
             _currentBackPressTime = now;
             Fluttertoast.showToast(
               msg: 'Tekan sekali lagi untuk keluar',
             );
             return Future.value(false);
-          } else if (_currentBackPressTime == null || now.difference(_currentBackPressTime) < Duration(seconds: 2)) {
+          } else if (_currentBackPressTime == null || now.difference(_currentBackPressTime!) < Duration(seconds: 2)) {
             _animationController.reverse();
             SystemNavigator.pop();
             return Future.value(true);
@@ -176,7 +176,7 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
                 useRootNavigator: true,
                 context: context,
                 builder: (_) => AlertDialog(
-                      title: Text("Apakah Anda yakin ?", style: stateFontSize.title.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
+                      title: Text("Apakah Anda yakin ?", style: stateFontSize.title!.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
                       content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
                       actions: [
                         TextButton(
@@ -288,23 +288,23 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
     });
 
     if (result != null) {
-      List files = result.files.single.path.split("/");
+      List files = result!.files.single.path!.split("/");
       setState(() {
         directory = files[files.length - 1];
       });
     }
   }
 
-  _inputDataToDatabase(BuildContext context) async {
-    var file = result.files.single.path;
+  _inputDataToDatabase(BuildContext context) {
+    var file = result!.files.single.path!;
     var bytes = File(file).readAsBytesSync();
     var excel = Excel.decodeBytes(bytes);
 
     int counter = 0;
 
     for (var table in excel.tables.keys) {
-      for (var row in excel.tables[table].rows) {
-        // print("pdil Row : $row");
+      for (var row in excel.tables[table]!.rows) {
+        print("pdil Row : $row");
         Pdil pdilExcel;
         if (counter > 0 && counter < 2) {
           context.read<ImportBloc>().add(ImportConfirm(_isPasca ? Import.pascabayarImported : Import.prabayarImported, prefixIdPel: row[1].toString().substring(0, 5)));
@@ -317,37 +317,37 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
             alamat: _isPasca ? row[formatIndexs[2]].toString() : row[formatIndexs[3]].toString(),
             tarip: _isPasca ? row[formatIndexs[3]].toString() : row[formatIndexs[4]].toString(),
             daya: _isPasca ? row[formatIndexs[4]].toString() : row[formatIndexs[5]].toString().split(".")[0],
-            noHp: formatIndexs.length == 10
-                ? _isPasca
-                    ? row[formatIndexs[5]]
-                    : row[formatIndexs[6]]
-                : null,
-            nik: formatIndexs.length == 10
-                ? _isPasca
-                    ? row[formatIndexs[6]]
-                    : row[formatIndexs[7]]
-                : null,
-            npwp: formatIndexs.length == 10
-                ? _isPasca
-                    ? row[formatIndexs[7]]
-                    : row[formatIndexs[8]]
-                : null,
-            catatan: formatIndexs.length == 10
-                ? _isPasca
-                    ? row[formatIndexs[8]]
-                    : row[formatIndexs[9]]
-                : null,
-            tanggalBaca: formatIndexs.length == 10
-                ? _isPasca
-                    ? row[formatIndexs[9]]
-                    : row[formatIndexs[10]]
-                : null,
+            // noHp: formatIndexs.length == 10
+            //     ? _isPasca
+            //         ? row[formatIndexs[5]]
+            //         : row[formatIndexs[6]]
+            //     : null,
+            // nik: formatIndexs.length == 10
+            //     ? _isPasca
+            //         ? row[formatIndexs[6]]
+            //         : row[formatIndexs[7]]
+            //     : null,
+            // npwp: formatIndexs.length == 10
+            //     ? _isPasca
+            //         ? row[formatIndexs[7]]
+            //         : row[formatIndexs[8]]
+            //     : null,
+            // catatan: formatIndexs.length == 10
+            //     ? _isPasca
+            //         ? row[formatIndexs[8]]
+            //         : row[formatIndexs[9]]
+            //     : null,
+            // tanggalBaca: formatIndexs.length == 10
+            //     ? _isPasca
+            //         ? row[formatIndexs[9]]
+            //         : row[formatIndexs[10]]
+            //     : null,
             isKoreksi: false,
           );
           context.read<InputDataBloc>().add(InputDataAdd(
                 data: pdilExcel,
                 row: counter + 1,
-                maxRow: excel.tables[table].maxRows,
+                maxRow: excel.tables[table]!.maxRows,
                 isPasca: _isPasca,
               ));
         } else if (counter < 1) {

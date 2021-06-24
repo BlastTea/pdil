@@ -4,30 +4,53 @@ part of 'pdil_bloc.dart';
 abstract class PdilEvent {}
 
 class FetchPdil extends PdilEvent {
-  final String idPel;
+  final String? idPel;
+  final String? noMeter;
+  final bool isPasca;
   final bool isContinuingSearch;
   final bool isFromCustomerData;
 
-  FetchPdil(this.idPel, {this.isContinuingSearch = false, this.isFromCustomerData = false});
+  FetchPdil({
+    required this.idPel,
+    required this.isPasca,
+    this.isContinuingSearch = false,
+    this.isFromCustomerData = false,
+    this.noMeter,
+  });
 }
 
 class UpdatePdil extends PdilEvent {
-  final Pdil pdil;
+  final Pdil? pdil;
   final bool isUsingSaveDialog;
+  final bool isPasca;
 
-  UpdatePdil(this.pdil, this.isUsingSaveDialog);
+  UpdatePdil({
+    required this.pdil,
+    required this.isUsingSaveDialog,
+    required this.isPasca,
+  });
 }
 
-class ClearPdilState extends PdilEvent {}
+class ClearPdilState extends PdilEvent {
+  final bool isPasca;
+
+  ClearPdilState({required this.isPasca});
+}
 
 class UpdatePdilController extends PdilEvent {
-  final Pdil previousPdil;
-  final Pdil currentPdil;
-  final Pdil comparePdil;
+  final Pdil? currentPdilPasca;
+  final Pdil? originalPdilPasca;
+
+  final Pdil? currentPdilPra;
+  final Pdil? originalPdilPra;
+
+  final bool isPasca;
 
   UpdatePdilController({
-    @required this.previousPdil,
-    @required this.currentPdil,
-    @required this.comparePdil,
+    required this.currentPdilPasca,
+    required this.originalPdilPasca,
+    required this.currentPdilPra,
+    required this.originalPdilPra,
+    required this.isPasca,
   });
 }
