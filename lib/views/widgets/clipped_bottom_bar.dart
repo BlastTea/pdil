@@ -1,6 +1,7 @@
 part of 'widgets.dart';
 
 Animation<double>? _animationClipper;
+Animation? _animationCurveClipper;
 
 class ClippedBottomBar extends StatefulWidget {
   List<ClippedBottomBarItem> items;
@@ -37,13 +38,13 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
       widget.items.length,
       (index) => AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 200),
       ),
     );
 
     _controllerClipper = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 200),
     );
   }
 
@@ -125,8 +126,7 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
                     animation: _animationControllers[index],
                     builder: (_, child) {
                       return Transform(
-                        transform: Matrix4.translationValues(
-                            0.0, -17.5 * (_animationIconCircles[index] != null ? _animationIconCircles[index]!.value : -1.5), 0.0),
+                        transform: Matrix4.translationValues(0.0, -17.5 * (_animationIconCircles[index] != null ? _animationIconCircles[index]!.value : -1.5), 0.0),
                         child: child,
                       );
                     },
@@ -184,13 +184,10 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
     switch (index) {
       case 0:
         return size.width / 4 - 40;
-        break;
       case 1:
         return size.width / 2 - 35;
-        break;
       case 2:
         return size.width * 3 / 4 - 30;
-        break;
     }
   }
 
@@ -198,8 +195,11 @@ class _ClippedBottomBarState extends State<ClippedBottomBar> with TickerProvider
     widget.onTap!(index);
     _animations[index] = Tween<double>(begin: 0.0, end: 1.0).animate(_animationControllers[index]);
     _animationIconCircles[index] = Tween<double>(begin: -1.5, end: 1.0).animate(_animationControllers[index]);
-    _animationClipper =
-        Tween<double>(begin: _getBottomClipper(context, _previousIndex), end: _getBottomClipper(context, index)).animate(_controllerClipper);
+    _animationClipper = Tween<double>(begin: _getBottomClipper(context, _previousIndex), end: _getBottomClipper(context, index)).animate(_controllerClipper);
+    _animationCurveClipper = CurvedAnimation(
+      parent: _controllerClipper,
+      curve: Curves.fastOutSlowIn,
+    );
     _animationControllers[index].forward();
     _animationControllers[_previousIndex!].reverse();
     _controllerClipper.addListener(() {

@@ -1,5 +1,7 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:meta/meta.dart';
+import 'package:pdil/services/navigation_helper.dart';
 import 'package:pdil/services/services.dart';
 
 part 'import_event.dart';
@@ -27,43 +29,56 @@ class ImportBloc extends Bloc<ImportEvent, ImportState> {
           break;
       }
     } else if (event is ImportConfirm) {
-      Import currentImport = await ImportServices.getCurrentImport();
+      if (!event.isFromExportPage) {
+        Import currentImport = await ImportServices.getCurrentImport();
 
-      switch (event.import) {
-        case Import.bothImported:
-          break;
-        case Import.bothNotImported:
-          break;
-        case Import.pascabayarImported:
-          await ImportServices.savePrefixIdpelPasca(event.prefixIdPel ?? "");
-          if (currentImport == Import.prabayarImported) {
-            await ImportServices.saveImport(Import.bothImported);
-            yield ImportBothImported();
-          } else {
+        switch (event.import) {
+          case Import.bothImported:
             await ImportServices.saveImport(event.import);
+            if (event.prefixIdPelPasca != null) await ImportServices.savePrefixIdpelPasca(event.prefixIdPelPasca ?? '');
+            if (event.prefixIdpelPra != null) await ImportServices.savePrefixIdpelPra(event.prefixIdpelPra ?? '');
+            yield ImportBothImported();
+            break;
+          case Import.bothNotImported:
+            break;
+          case Import.pascabayarImported:
+            await ImportServices.savePrefixIdpelPasca(event.prefixIdPelPasca ?? "");
+            if (currentImport == Import.prabayarImported) {
+              await ImportServices.saveImport(Import.bothImported);
+              yield ImportBothImported();
+            } else {
+              await ImportServices.saveImport(event.import);
+              yield ImportPascabayarImported();
+            }
+            break;
+          case Import.prabayarImported:
+            await ImportServices.savePrefixIdpelPra(event.prefixIdPelPasca ?? '');
+            if (currentImport == Import.pascabayarImported) {
+              await ImportServices.saveImport(Import.bothImported);
+              yield ImportBothImported();
+            } else {
+              await ImportServices.saveImport(event.import);
+              yield ImportPrabayarImported();
+            }
+            break;
+        }
+      } else {
+        ImportServices.saveImport(event.import);
+        switch (event.import) {
+          case Import.bothImported:
+            yield ImportBothImported();
+            break;
+          case Import.bothNotImported:
+            yield ImportBothNotImported();
+            break;
+          case Import.pascabayarImported:
             yield ImportPascabayarImported();
-          }
-          break;
-        case Import.prabayarImported:
-          await ImportServices.savePrefixIdpelPra(event.prefixIdPel ?? '');
-          if(currentImport == Import.pascabayarImported) {
-            await ImportServices.saveImport(Import.bothImported);
-            yield ImportBothImported();
-          } else {
-            await ImportServices.saveImport(event.import);
+            break;
+          case Import.prabayarImported:
             yield ImportPrabayarImported();
-          }
-          break;
+            break;
+        }
       }
-
-      // if (event.isConfirmed) {
-      //   yield ImportImported();
-      // } else if (!event.isConfirmed) {
-      //   await dbHelper.deleteAll();
-      //   NavigationHelper.back();
-      //   NavigationHelper.back();
-      //   yield ImportNotImported();
-      // }
     }
   }
 }

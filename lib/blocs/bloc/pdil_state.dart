@@ -11,8 +11,10 @@ class PdilLoaded extends PdilState {
   final Pdil? originalPdilPra;
   final Pdil? currentPdilPra;
   final bool isFromCustomerData;
-  final bool isContinousSearch;
+  final bool isContinuingSearch;
   final bool isPasca;
+  final bool isClearState;
+  final bool? isIdpel;
 
   PdilLoaded({
     required this.originalPdilPasca,
@@ -20,8 +22,10 @@ class PdilLoaded extends PdilState {
     required this.originalPdilPra,
     required this.currentPdilPra,
     this.isFromCustomerData = false,
-    this.isContinousSearch = false,
+    this.isContinuingSearch = false,
     required this.isPasca,
+    this.isClearState = false,
+    this.isIdpel,
   });
 }
 
@@ -41,8 +45,9 @@ class PdilOnUpdate extends PdilState {
 
 class PdilClearedState extends PdilState {
   final bool isPasca;
+  final bool isContinuingSearch;
 
-  PdilClearedState({required this.isPasca});
+  PdilClearedState({required this.isPasca, this.isContinuingSearch = false});
 }
 
 class UpdatedPdilController extends PdilState {

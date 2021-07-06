@@ -9,13 +9,13 @@ class FontSizeResult extends FontSizeState {
   final TextStyle? body1;
   final TextStyle? body2;
 
-  final double? width;
+  final double width;
 
   FontSizeResult({
     this.title,
     this.subtitle,
     this.body1,
     this.body2,
-    this.width,
+    required this.width,
   });
 }

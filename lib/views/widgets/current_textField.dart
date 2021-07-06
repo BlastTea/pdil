@@ -49,49 +49,49 @@ class CurrentTextField extends StatefulWidget {
   _CurrentTextFieldState createState() => _CurrentTextFieldState();
 }
 
-class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-
-  late Animation<double> _animation;
+class _CurrentTextFieldState extends State<CurrentTextField> {
+  double _opacity = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _animation = Tween<double>(begin: -2.5, end: 1.0).animate(_animationController);
     widget.controller!.addListener(() {
       if (widget.controller!.text != '' && widget.onCancelTap != null) {
-        _animationController.forward();
+        _showCancelButton(context);
       } else if (widget.controller!.text == '' && widget.onCancelTap != null) {
-        _animationController.reverse();
+        _hideCanelButton(context);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      if (widget.controller!.text != '' && widget.onCancelTap != null) {
+        _showCancelButton(context);
+      } else if (widget.controller!.text == '' && widget.onCancelTap != null) {
+        _hideCanelButton(context);
+      }
+    });
     return BlocBuilder<FontSizeBloc, FontSizeState>(
       builder: (_, stateFontSize) {
         if (stateFontSize is FontSizeResult) {
           return Stack(
-            fit: StackFit.passthrough,
-            alignment: Alignment.center,
+            // fit: StackFit.passthrough,
+            alignment: Alignment.centerRight,
             children: [
               Container(
                 width: widget.width ?? double.infinity,
-                height: (widget.height ?? 40) + (stateFontSize.title!.fontSize! - 20),
+                height: (widget.height ?? 40) + (stateFontSize.width),
                 decoration: cardDecoration,
                 child: TextField(
                   textInputAction: widget.textInputAction,
                   onSubmitted: widget.onSubmitted,
                   onChanged: (value) {
                     if (widget.controller!.text != '' && widget.onCancelTap != null) {
-                      _animationController.forward();
+                      _showCancelButton(context);
                     } else if (widget.controller!.text == '' && widget.onCancelTap != null) {
-                      _animationController.reverse();
+                      _hideCanelButton(context);
                     }
                     widget.onChanged!(value);
                   },
@@ -105,7 +105,7 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
                   minLines: widget.minLines,
                   textAlignVertical: TextAlignVertical.top,
                   decoration: InputDecoration(
-                    contentPadding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 10),
+                    contentPadding: widget.padding ?? EdgeInsets.only(left: 10, right: widget.onCancelTap != null ? 35 : 10),
                     prefixText: widget.prefixText,
                     prefixStyle: stateFontSize.body1,
                     prefixIcon: widget.prefixIcon,
@@ -134,22 +134,29 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
                     if (widget.isInputPage && statePdil is PdilClearedState) {
                       Future.delayed(const Duration(milliseconds: 100)).then((value) {
                         if (widget.controller!.text == '' && widget.onCancelTap != null) {
-                          _animationController.reverse();
+                          _hideCanelButton(context);
                         }
                       });
                     }
                   },
-                  child: AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (_, child) => Positioned(right: 10 * _animation.value, child: child!),
-                    child: GestureDetector(
-                      onTap: () {
-                        widget.onCancelTap!();
-                        if (widget.controller!.text == '' && widget.onCancelTap != null) {
-                          _animationController.reverse();
-                        }
-                      },
-                      child: Icon(Icons.cancel),
+                  child: Positioned(
+                    right: 10,
+                    child: AnimatedOpacity(
+                      opacity: _opacity,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.fastOutSlowIn,
+                      child: AbsorbPointer(
+                        absorbing: widget.controller!.text == '' && widget.onCancelTap != null,
+                        child: GestureDetector(
+                          onTap: () {
+                            widget.onCancelTap!();
+                            if (widget.controller!.text == '' && widget.onCancelTap != null) {
+                              _hideCanelButton(context);
+                            }
+                          },
+                          child: Icon(Icons.cancel),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -159,5 +166,17 @@ class _CurrentTextFieldState extends State<CurrentTextField> with SingleTickerPr
         return Container();
       },
     );
+  }
+
+  _showCancelButton(BuildContext context) {
+    setState(() {
+      _opacity = 1.0;
+    });
+  }
+
+  _hideCanelButton(BuildContext context) {
+    setState(() {
+      _opacity = 0.0;
+    });
   }
 }

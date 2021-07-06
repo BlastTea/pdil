@@ -11,11 +11,11 @@ class FetchPdil extends PdilEvent {
   final bool isFromCustomerData;
 
   FetchPdil({
-    required this.idPel,
     required this.isPasca,
+    this.idPel,
+    this.noMeter,
     this.isContinuingSearch = false,
     this.isFromCustomerData = false,
-    this.noMeter,
   });
 }
 

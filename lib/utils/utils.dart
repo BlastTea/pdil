@@ -96,9 +96,34 @@ String currentTime() {
   int tahun = time.year;
 
   int jam = time.hour;
-  int minute = time.minute;
+  int menit = time.minute;
+  int detik = time.second;
 
-  return '$tanggal/$bulan/$tahun $jam:$minute';
+  return '$tahun-${_checkDateAddZeroFormat(bulan)}-${_checkDateAddZeroFormat(tanggal)} ${_checkDateAddZeroFormat(jam)}:${_checkDateAddZeroFormat(menit)}:${_checkDateAddZeroFormat(detik)}';
+}
+
+String currentTimeIndonesia({DateTime? currentTime, String? formattedString, bool ignoreTime = false}) {
+  DateTime time = currentTime ?? DateTime.parse(formattedString!);
+
+  int tanggal = time.day;
+  int bulan = time.month;
+  int tahun = time.year;
+  if (ignoreTime) {
+    return '${_checkDateAddZeroFormat(tanggal)}/${_checkDateAddZeroFormat(bulan)}/$tahun';
+  }
+  int jam = time.hour;
+  int menit = time.minute;
+  int detik = time.second;
+
+  return '${_checkDateAddZeroFormat(tanggal)}-${_checkDateAddZeroFormat(bulan)}-$tahun ${_checkDateAddZeroFormat(jam)}:${_checkDateAddZeroFormat(menit)}:${_checkDateAddZeroFormat(detik)}';
+}
+
+String _checkDateAddZeroFormat(int time) {
+  String timeString = time.toString();
+  if (timeString.length == 1) {
+    return '0$timeString';
+  }
+  return timeString;
 }
 
 BoxDecoration cardDecoration = BoxDecoration(

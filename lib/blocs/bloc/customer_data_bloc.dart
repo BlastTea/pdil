@@ -28,6 +28,7 @@ class CustomerDataBloc extends Bloc<CustomerDataEvent, CustomerDataState> {
             pdilPra: pdilPra,
             searchResult: event.searchQuery,
             column: event.column,
+            isSetIxExpandNull: event.isSetIsExpandNull,
           );
         } else {
           pdilPasca = await dbPasca.getPdilList(query: event.searchQuery);
@@ -36,12 +37,17 @@ class CustomerDataBloc extends Bloc<CustomerDataEvent, CustomerDataState> {
             pdilPasca: pdilPasca,
             pdilPra: pdilPra,
             searchResult: event.searchQuery,
+            isSetIxExpandNull: event.isSetIsExpandNull,
           );
         }
       } else {
         pdilPasca = await dbPasca.getPdilList();
         pdilPra = await dbPra.getPdilList();
-        yield CustomerDataResult(pdilPasca: pdilPasca, pdilPra: pdilPra);
+        yield CustomerDataResult(
+          pdilPasca: pdilPasca,
+          pdilPra: pdilPra,
+          isSetIxExpandNull: event.isSetIsExpandNull,
+        );
       }
     } else if (event is UpdateCustomerDataPasca) {
       pdilPasca = await dbPasca.getPdilList();

@@ -11,6 +11,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   TextEditingController _controllerExportData = TextEditingController();
+  TextEditingController _controllerDateExport = TextEditingController();
 
   bool _isPasca = true;
   bool _isExportBoth = false;
@@ -21,97 +22,11 @@ class _SettingsPageState extends State<SettingsPage> {
   Sheet? sheetPasca;
   Sheet? sheetPra;
 
+  DateTimeRange? dateRangeResult;
+
   @override
   Widget build(BuildContext context) {
     return _secondVersion(context);
-
-    // return BlocBuilder<FontSizeBloc, FontSizeState>(
-    //   builder: (_, stateFontSize) => (stateFontSize is FontSizeResult)
-    //       ? Scaffold(
-    //           appBar: AppBar(
-    //             title: Text("Pengaturan",
-    //                 style: stateFontSize.title.copyWith(color: whiteColor, fontWeight: FontWeight.w600)),
-    //           ),
-    //           body: ListView(
-    //             children: [
-    //               ListTile(
-    //                 leading: Stack(
-    //                   children: [
-    //                     ClipPath.shape(
-    //                       shape: CircleBorder(),
-    //                       child: Container(
-    //                         width: 30,
-    //                         height: 30,
-    //                         color: greenColor,
-    //                       ),
-    //                     ),
-    //                     SvgPicture.asset(
-    //                       "assets/icons/TextAa.svg",
-    //                       width: 18,
-    //                       height: 18,
-    //                     ),
-    //                   ],
-    //                 ),
-    //                 title: Text("Ukuran Font", style: stateFontSize.subtitle.copyWith(fontWeight: FontWeight.w600)),
-    //                 // subtitle: Text("atur ukuran font sesuai dengan keinginan", style: stateFontSize.body),
-    //                 onTap: () async {
-    //                   double value = await FontSizeServices.getFontSize() ?? 0;
-    //                   if (value != 0) {
-    //                     value = (value - 20) / 2;
-    //                   }
-    //                   NavigationHelper.to(MaterialPageRoute(builder: (_) => FontSizePage(sliderValue: value ?? 0)));
-    //                 },
-    //               ),
-    //               Padding(
-    //                 padding: const EdgeInsets.symmetric(horizontal: 25),
-    //                 child: Divider(
-    //                   thickness: 2,
-    //                 ),
-    //               ),
-    //               if (!widget.isImport) ...[
-    //                 ListTile(
-    //                   leading: Stack(
-    //                     children: [
-    //                       Image.asset(
-    //                         "assets/images/ExportExcel.png",
-    //                         width: 30,
-    //                         height: 30,
-    //                       ),
-    //                     ],
-    //                   ),
-    //                   title: Text("Simpan", style: stateFontSize.subtitle.copyWith(fontWeight: FontWeight.w600)),
-    //                   onTap: () {
-    //                     NavigationHelper.to(MaterialPageRoute(builder: (_) => ExportPage(true)));
-    //                   },
-    //                 ),
-    //                 Padding(
-    //                   padding: const EdgeInsets.symmetric(horizontal: 25),
-    //                   child: Divider(
-    //                     thickness: 2,
-    //                   ),
-    //                 ),
-    //                 ListTile(
-    //                   leading: Stack(
-    //                     children: [
-    //                       Image.asset(
-    //                         "assets/images/ExportExcel.png",
-    //                         width: 30,
-    //                         height: 30,
-    //                       ),
-    //                     ],
-    //                   ),
-    //                   title: Text("Export Data Ke Excel",
-    //                       style: stateFontSize.subtitle.copyWith(color: redColor, fontWeight: FontWeight.w600)),
-    //                   onTap: () {
-    //                     NavigationHelper.to(MaterialPageRoute(builder: (_) => ExportPage(false)));
-    //                   },
-    //                 ),
-    //               ]
-    //             ],
-    //           ),
-    //         )
-    //       : Container(),
-    // );
   }
 
   _secondVersion(BuildContext context) => BlocBuilder<FontSizeBloc, FontSizeState>(builder: (_, stateFontSize) {
@@ -199,13 +114,12 @@ class _SettingsPageState extends State<SettingsPage> {
           style: stateFontSize.subtitle!.copyWith(fontWeight: FontWeight.w600),
         ),
         onTap: () {
-          NavigationHelper.to(
-            PageRouteBuilder(
-              barrierColor: blackColor.withOpacity(0.5),
-              barrierDismissible: false,
-              opaque: false,
-              pageBuilder: (_, __, ___) => ImportPage(),
-            ),
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            builder: (_) {
+              return ImportPage.design();
+            },
           );
         },
       );
@@ -229,7 +143,7 @@ class _SettingsPageState extends State<SettingsPage> {
         },
       );
 
-  _exportDialog(BuildContext context, FontSizeResult stateFontSize, {bool isExport = true}) => showModalBottomSheet(
+  _exportDialog(BuildContext context, FontSizeResult stateFontSize, {bool isExport = true}) async => showModalBottomSheet(
         context: context,
         backgroundColor: Colors.transparent,
         builder: (_) => Container(
@@ -246,18 +160,77 @@ class _SettingsPageState extends State<SettingsPage> {
               if (isExport) ...[
                 CheckboxIsExportBoth(
                   isExportBoth: _isExportBoth,
-                  onChanged: (newValue) {
+                  isPasca: _isPasca,
+                  onCheckBoxTap: (newValue) {
                     _isExportBoth = newValue!;
+                  },
+                  onToggleButtonTap: (isPasca) {
+                    _isPasca = isPasca!;
                   },
                   stateFontSize: stateFontSize,
                 ),
-                MyToggleButton(
-                  toggleButtonSlot: ToggleButtonSlot.export,
-                  onTap: (isPasca) {
-                    _isPasca = isPasca;
+              ],
+              if (!isExport)
+                FutureBuilder<String?>(
+                  future: DatePickerService.getStartDate(),
+                  builder: (_, snapshot) {
+                    if (snapshot.hasData && snapshot.data != null) {
+                      return Column(
+                        children: [
+                          SizedBox(height: 5),
+                          Row(
+                            children: [
+                              CurrentTextField(
+                                controller: _controllerDateExport,
+                                width: MediaQuery.of(context).size.width - 115,
+                                borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
+                                readOnly: true,
+                                onCancelTap: () {
+                                  _controllerDateExport.text = '';
+                                },
+                                onChanged: (value) {},
+                              ),
+                              // Button For show Date
+                              Container(
+                                width: 65,
+                                height: 40 + stateFontSize.width,
+                                decoration: cardDecoration.copyWith(
+                                  borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
+                                  color: primaryColor,
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
+                                    splashColor: inkWellSplashColor,
+                                    onTap: () async {
+                                      dateRangeResult = await showDateRangePicker(
+                                        context: context,
+                                        firstDate: DateTime.parse(await DatePickerService.getStartDate() ?? currentTime()),
+                                        lastDate: DateTime.parse(await DatePickerService.getEndDate() ?? currentTime()),
+                                      );
+                                      if (dateRangeResult != null) {
+                                        WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+                                          _controllerDateExport.text = '${currentTimeIndonesia(currentTime: dateRangeResult?.start, ignoreTime: true)} - ${currentTimeIndonesia(currentTime: dateRangeResult?.end, ignoreTime: true)}';
+                                        });
+                                      }
+                                    },
+                                    child: Icon(
+                                      Icons.date_range_rounded,
+                                      color: whiteColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+                    return Container();
                   },
                 ),
-              ],
               SizedBox(height: 5),
               CurrentTextField(
                 controller: _controllerExportData,
@@ -293,8 +266,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             useRootNavigator: true,
                             context: context,
                             builder: (_) => AlertDialog(
-                                  title: Text("Apakah Anda yakin ?",
-                                      style: stateFontSize.title!.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
+                                  title: Text("Apakah Anda yakin ?", style: stateFontSize.title!.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
                                   content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
                                   actions: [
                                     TextButton(
@@ -333,9 +305,6 @@ class _SettingsPageState extends State<SettingsPage> {
     try {
       var excel = Excel.createExcel();
 
-      sheetPasca = null;
-      sheetPra = null;
-
       List<Pdil> pdilPasca;
       List<Pdil> pdilPra;
 
@@ -354,46 +323,79 @@ class _SettingsPageState extends State<SettingsPage> {
         'TANGGALBACA',
       ];
 
-      List<String> praRow = pascaRow..insert(2, 'NO METER');
+      List<String> praRow = [
+        'NOMOR',
+        'IDPEL',
+        'NO METER',
+        'NAMA',
+        'ALAMAT',
+        'TARIF',
+        'DAYA',
+        'NOHP',
+        'NIK',
+        'NPWP',
+        'EMAIL',
+        'CATATAN',
+        'TANGGALBACA',
+      ];
 
       _loadingExport(context: context, stateFontSize: stateFontSize, isExport: isExport);
 
-      if (_isExportBoth) {
+      if (!isExport) {
+        pdilPasca = (await _dbPasca.getPdilList())!;
+        if (dateRangeResult != null && _controllerDateExport.text != '') {
+          pdilPasca = pdilPasca.where((pdil) {
+            if (pdil.tanggalBaca == null) {
+              return false;
+            }
+            DateTime? timeTanggalBaca = DateTime.parse(pdil.tanggalBaca!.substring(0, 10));
+            return (timeTanggalBaca.isAfter(dateRangeResult?.start as DateTime) || timeTanggalBaca.isAtSameMomentAs(dateRangeResult?.start as DateTime)) && (timeTanggalBaca.isBefore(dateRangeResult?.end as DateTime) || timeTanggalBaca.isAtSameMomentAs(dateRangeResult?.end as DateTime));
+          }).toList();
+        }
+        if (pdilPasca.length != 0) {
+          sheetPasca = excel['Pascabayar'];
+        }
+
+        pdilPra = (await _dbPra.getPdilList())!;
+        if (dateRangeResult != null && _controllerDateExport.text != '') {
+          pdilPra = pdilPra.where((pdil) {
+            if (pdil.tanggalBaca == null) {
+              return false;
+            }
+            DateTime? timeTanggalBaca = DateTime.parse(pdil.tanggalBaca!.substring(0, 10));
+            return (timeTanggalBaca.isAfter(dateRangeResult?.start as DateTime) || timeTanggalBaca.isAtSameMomentAs(dateRangeResult?.start as DateTime)) && (timeTanggalBaca.isBefore(dateRangeResult?.end as DateTime) || timeTanggalBaca.isAtSameMomentAs(dateRangeResult?.end as DateTime));
+          }).toList();
+        }
+        if (pdilPra.length != 0) {
+          sheetPra = excel['Prabayar'];
+        }
+
+        await _appendPasca(context, pdilPasca: pdilPasca, pascaRow: pascaRow, isExport: isExport);
+        await _appendPra(context, pdilPra: pdilPra, praRow: praRow, isExport: isExport);
+      } else if (_isExportBoth) {
         sheetPasca = excel['Pascabayar'];
         sheetPra = excel['Prabayar'];
 
-        print('mengambil data...Both');
         pdilPasca = (await _dbPasca.getPdilList())!;
         pdilPra = (await _dbPra.getPdilList())!;
 
-        print('mengeksport data...Both');
-        _appendPasca(context, pdilPasca: pdilPasca, pascaRow: pascaRow);
-        _appendPra(context, pdilPra: pdilPra, praRow: praRow);
+        await _appendPasca(context, pdilPasca: pdilPasca, pascaRow: pascaRow, isExport: isExport);
+        await _appendPra(context, pdilPra: pdilPra, praRow: praRow, isExport: isExport);
       } else if (_isPasca) {
         sheetPasca = excel['Pascabayar'];
-        print('mengambil data...Pascabayar');
         pdilPasca = (await _dbPasca.getPdilList())!;
-        print('mengeksport data...Pascabayar');
-        _appendPasca(context, pdilPasca: pdilPasca, pascaRow: pascaRow);
+        await _appendPasca(context, pdilPasca: pdilPasca, pascaRow: pascaRow, isExport: isExport);
       } else if (!_isPasca) {
         sheetPra = excel['Prabayar'];
-        print('mengambil data...prabayar');
         pdilPra = (await _dbPra.getPdilList())!;
-        print('mengeksport data...prabayar');
-        _appendPra(context, pdilPra: pdilPra, praRow: praRow);
+        await _appendPra(context, pdilPra: pdilPra, praRow: praRow, isExport: isExport);
       }
 
       List<Directory>? listDirectory = await getExternalStorageDirectories(type: StorageDirectory.downloads);
-
-      // excel.encode().then((value) async {
-      //   var file = File(listDirectory[0].path + '/$namaFile.xlsx');
-
-      //   await file.create(recursive: true);
-
-      //   file.writeAsBytesSync(value);
-      // });
-
-      var data = await excel.save();
+      var data = excel.save();
+      File(join(listDirectory![0].path + '/$namaFile.xlsx'))
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(data!);
     } catch (_) {} finally {}
   }
 
@@ -408,14 +410,33 @@ class _SettingsPageState extends State<SettingsPage> {
                 if (exportDataState is ExportDataProgress) {
                   int persentase = int.parse((exportDataState.progress * 100).toString().split('.')[0]);
                   if (persentase == 100) {
-                    Future.delayed(const Duration(milliseconds: 500)).then((value) async {
-                      NavigationHelper.back();
-                      NavigationHelper.back();
-                      if (!isExport) {
-                        Fluttertoast.showToast(msg: 'Data telah di simpan');
-                      } else {
-                        context.read<ImportBloc>().add(ImportConfirm(await _getImportBloc(context)));
-                      }
+                    Future.delayed(const Duration(milliseconds: 500)).then((value) {
+                      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) async {
+                        if (!isExport) {
+                          Fluttertoast.showToast(msg: 'Data telah di simpan');
+                        } else {
+                          if (_isExportBoth) {
+                            int pascaCount = await _dbPasca.deleteAll();
+                            int praCount = await _dbPra.deleteAll();
+                            if (pascaCount > 0 && praCount > 0) {
+                              Fluttertoast.showToast(msg: 'Data Telah Di Export');
+                            }
+                          } else if (_isPasca) {
+                            int pascaCount = await _dbPasca.deleteAll();
+                            if (pascaCount > 0) {
+                              Fluttertoast.showToast(msg: 'Data Telah Di Export');
+                            }
+                          } else if (!_isPasca) {
+                            int praCount = await _dbPra.deleteAll();
+                            if (praCount > 0) {
+                              Fluttertoast.showToast(msg: 'Data Telah Di Export');
+                            }
+                          }
+                        }
+                        Future.delayed(const Duration(milliseconds: 200)).then((value) {
+                          context.read<ExportDataBloc>().add(ExportDataInit());
+                        });
+                      });
                     });
                   }
                   return Column(
@@ -425,19 +446,27 @@ class _SettingsPageState extends State<SettingsPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width / 2,
-                            height: 6,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 500),
-                              width: MediaQuery.of(context).size.width / 2 * exportDataState.progress,
-                              height: 6,
-                              color: exportDataState.progress < 0.5
-                                  ? redColor
-                                  : exportDataState.progress < 0.7
-                                      ? yellowColor
-                                      : greenColor,
-                            ),
+                          Stack(
+                            children: [
+                              Container(
+                                width: MediaQuery.of(context).size.width / 2,
+                                height: 6,
+                                decoration: BoxDecoration(color: greyColor, borderRadius: BorderRadius.circular(3)),
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 500),
+                                width: MediaQuery.of(context).size.width / 2 * exportDataState.progress,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: exportDataState.progress < 0.5
+                                      ? redColor
+                                      : exportDataState.progress < 0.7
+                                          ? yellowColor
+                                          : greenColor,
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                              ),
+                            ],
                           ),
                           SizedBox(width: 10),
                           Stack(
@@ -460,60 +489,48 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       );
 
-  Future<Import> _getImportBloc(BuildContext context) async {
-    Import currentImport = await ImportServices.getCurrentImport();
-    switch (currentImport) {
-      case Import.bothImported:
-        if (_isExportBoth) {
-          return Import.bothNotImported;
-        } else if (_isPasca) {
-          return Import.prabayarImported;
-        } else if (!_isPasca) {
-          return Import.pascabayarImported;
-        }
-        break;
-      case Import.bothNotImported:
-        return Import.bothNotImported;
-      case Import.pascabayarImported:
-        if (_isPasca) {
-          return Import.bothNotImported;
-        }
-        break;
-      case Import.prabayarImported:
-        if (!_isPasca) {
-          return Import.bothNotImported;
-        }
-        break;
-    }
-    return Import.bothNotImported;
-  }
-
-  _appendPasca(BuildContext context, {required List<Pdil> pdilPasca, required List<String> pascaRow}) {
+  _appendPasca(BuildContext context, {required List<Pdil> pdilPasca, required List<String> pascaRow, required bool isExport}) {
     int counterPasca = 0;
     pdilPasca.forEach((row) {
       if (counterPasca < 1) {
-        sheetPasca!.appendRow(pascaRow);
+        sheetPasca?.appendRow(pascaRow);
       }
       counterPasca++;
-      context.read<ExportDataBloc>().add(ExportDataExport(row: counterPasca, maxRow: pdilPasca.length, message: 'Mengeksport Pascabayar'));
+      context.read<ExportDataBloc>().add(ExportDataExport(
+            row: counterPasca,
+            maxRow: pdilPasca.length,
+            message: 'Mengeksport Pascabayar',
+            context: context,
+            isExport: isExport,
+            isExportBoth: _isExportBoth,
+            isPasca: _isPasca,
+          ));
 
-      sheetPasca!.appendRow(
-        row.toList(isPasca: true),
+      sheetPasca?.appendRow(
+        row.toList(isPasca: true)..insert(0, counterPasca.toString()),
       );
     });
   }
 
-  _appendPra(BuildContext context, {required List<Pdil> pdilPra, required List<String> praRow}) {
+  _appendPra(BuildContext context, {required List<Pdil> pdilPra, required List<String> praRow, required bool isExport}) {
     int counterPra = 0;
     pdilPra.forEach((row) {
       if (counterPra < 1) {
-        sheetPra!.appendRow(praRow);
+        sheetPra?.appendRow(praRow);
       }
       counterPra++;
-      context.read<ExportDataBloc>().add(ExportDataExport(row: counterPra, maxRow: pdilPra.length, message: 'Mengeksport Prabayar'));
+      context.read<ExportDataBloc>().add(ExportDataExport(
+            row: counterPra,
+            maxRow: pdilPra.length,
+            message: 'Mengeksport Prabayar',
+            context: context,
+            isExport: isExport,
+            isExportBoth: _isExportBoth,
+            isPasca: _isPasca,
+          ));
 
-      sheetPra!.appendRow(
-        row.toList(isPasca: false),
+      sheetPra?.appendRow(
+        row.toList(isPasca: false)..insert(0, counterPra.toString()),
       );
     });
   }
@@ -573,10 +590,12 @@ class _MySliderState extends State<MySlider> {
 
 class CheckboxIsExportBoth extends StatefulWidget {
   bool? isExportBoth;
-  Function(bool? newValue) onChanged;
+  bool? isPasca;
+  Function(bool? newValue) onCheckBoxTap;
+  Function(bool? newValue) onToggleButtonTap;
   FontSizeResult? stateFontSize;
 
-  CheckboxIsExportBoth({required this.isExportBoth, required this.onChanged, this.stateFontSize});
+  CheckboxIsExportBoth({required this.isExportBoth, required this.isPasca, required this.onCheckBoxTap, required this.onToggleButtonTap, required this.stateFontSize});
 
   @override
   _CheckboxIsExportBothState createState() => _CheckboxIsExportBothState();
@@ -585,22 +604,38 @@ class CheckboxIsExportBoth extends StatefulWidget {
 class _CheckboxIsExportBothState extends State<CheckboxIsExportBoth> {
   @override
   Widget build(BuildContext context) {
-    return Transform(
-      transform: Matrix4.translationValues(-12.0, 0.0, 0.0),
-      child: Row(
+    return BlocBuilder<ImportBloc, ImportState>(builder: (_, stateImport) {
+      return Column(
+        crossAxisAlignment: stateImport is ImportPascabayarImported || stateImport is ImportPrabayarImported ? CrossAxisAlignment.center : CrossAxisAlignment.start,
         children: [
-          Checkbox(
-            value: widget.isExportBoth,
-            onChanged: (newValue) {
-              setState(() {
-                widget.isExportBoth = newValue;
-                widget.onChanged(newValue);
-              });
-            },
-          ),
-          Text('Export keduanya', style: widget.stateFontSize!.body1),
+          if (stateImport is ImportBothImported)
+            Transform(
+              transform: Matrix4.translationValues(-12.0, 0.0, 0.0),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: widget.isExportBoth,
+                    onChanged: (newValue) {
+                      setState(() {
+                        widget.isExportBoth = newValue;
+                        widget.onCheckBoxTap(newValue);
+                      });
+                    },
+                  ),
+                  Text('Export keduanya', style: widget.stateFontSize!.body1),
+                ],
+              ),
+            ),
+          if (!widget.isExportBoth! && stateImport is ImportBothImported)
+            MyToggleButton(
+              toggleButtonSlot: ToggleButtonSlot.export,
+              onTap: (isPasca) {
+                widget.isPasca = isPasca;
+                widget.onToggleButtonTap(isPasca);
+              },
+            ),
         ],
-      ),
-    );
+      );
+    });
   }
 }

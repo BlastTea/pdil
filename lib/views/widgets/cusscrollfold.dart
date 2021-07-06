@@ -46,7 +46,11 @@ class _CusScrollFoldState extends State<CusScrollFold> {
                               ),
                             ),
                             SizedBox(height: 10.0),
-                            if (widget.myToggleButton != null) widget.myToggleButton!,
+                            if (widget.myToggleButton != null)
+                              Transform.translate(
+                                offset: Offset(-10, 0.0),
+                                child: widget.myToggleButton!,
+                              ),
                             if (stateCustomerData is CustomerDataResult && stateCustomerData.searchResult != null && widget.isCustomerDataPage) ...[
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -54,7 +58,7 @@ class _CusScrollFoldState extends State<CusScrollFold> {
                                   Text('Hasil Pencarian untuk "${stateCustomerData.searchResult}" ' + _getColumnCustomerData(context, stateCustomerData)),
                                   TextButton(
                                     onPressed: () {
-                                      context.read<CustomerDataBloc>().add(FetchCustomerData());
+                                      context.read<CustomerDataBloc>().add(FetchCustomerData(isSetIsExpandNull: true));
                                     },
                                     child: Text(
                                       'Batal',
@@ -74,7 +78,7 @@ class _CusScrollFoldState extends State<CusScrollFold> {
                         children: widget.action ?? [Container()],
                       ),
                     ],
-                    toolbarHeight: _getToolbarHeight(context, stateCustomerData),
+                    toolbarHeight: _getToolbarHeight(context, stateCustomerData, stateFontSize),
                   ),
                   SliverList(
                     delegate: SliverChildListDelegate(
@@ -91,16 +95,16 @@ class _CusScrollFoldState extends State<CusScrollFold> {
     );
   }
 
-  double _getToolbarHeight(BuildContext context, CustomerDataState stateCustomerData) {
+  double _getToolbarHeight(BuildContext context, CustomerDataState stateCustomerData, FontSizeResult stateFontSize) {
     if (stateCustomerData is CustomerDataResult) {
       if (widget.myToggleButton != null && stateCustomerData.searchResult != null) {
-        return 128.0;
+        return 128.0 + stateFontSize.width + 10.0;
       } else if (widget.myToggleButton != null) {
-        return 90.0;
+        return 90.0 + stateFontSize.width;
       }
     }
 
-    return 56.0;
+    return 56.0 + stateFontSize.width;
   }
 
   String _getColumnCustomerData(BuildContext context, CustomerDataResult stateCustomerData) {

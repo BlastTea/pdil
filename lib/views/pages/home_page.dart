@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
                           backgroundColor: primaryColor,
                           onPressed: () {
                             context.read<FabSaveBloc>().add(FabSaveOnPressed());
+                            context.read<FabBloc>().add(HideFab());
                           },
                           child: Icon(Icons.save, color: whiteColor),
                         );

@@ -1,5 +1,6 @@
 part of 'pages.dart';
 
+@deprecated
 class ExportPage extends StatelessWidget {
   final bool isSimpan;
 
@@ -16,8 +17,7 @@ class ExportPage extends StatelessWidget {
       builder: (_, stateFontSize) => (stateFontSize is FontSizeResult)
           ? Scaffold(
               appBar: AppBar(
-                title: Text(isSimpan ? "Simpan" : "Export",
-                    style: stateFontSize.title!.copyWith(fontWeight: FontWeight.w600, color: whiteColor)),
+                title: Text(isSimpan ? "Simpan" : "Export", style: stateFontSize.title!.copyWith(fontWeight: FontWeight.w600, color: whiteColor)),
               ),
               body: Stack(
                 children: [
@@ -40,9 +40,7 @@ class ExportPage extends StatelessWidget {
                                     useRootNavigator: true,
                                     context: context,
                                     builder: (_) => AlertDialog(
-                                          title: Text("Apakah Anda yakin ?",
-                                              style: stateFontSize.title!
-                                                  .copyWith(color: blackColor, fontWeight: FontWeight.w600)),
+                                          title: Text("Apakah Anda yakin ?", style: stateFontSize.title!.copyWith(color: blackColor, fontWeight: FontWeight.w600)),
                                           content: Text("Tindakan ini tidak dapat di undo", style: stateFontSize.body1),
                                           actions: [
                                             TextButton(
@@ -72,8 +70,7 @@ class ExportPage extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text("${isSimpan ? 'Simpan' : 'Export'} ke Excel",
-                                    style: stateFontSize.body1!.copyWith(color: whiteColor)),
+                                Text("${isSimpan ? 'Simpan' : 'Export'} ke Excel", style: stateFontSize.body1!.copyWith(color: whiteColor)),
                                 SizedBox(width: 10),
                                 Transform.rotate(
                                   angle: pi,
@@ -145,39 +142,49 @@ class ExportPage extends StatelessWidget {
     try {
       var excel = Excel.createExcel();
 
-      var sheet = excel['Sheet1'];
+      Sheet? sheetPascaBayar;
+      Sheet? sheetPraBayar;
+
+      if (isSimpan) {
+        sheetPascaBayar = excel['PascaBayar'];
+        sheetPraBayar = excel['PraBayar'];
+      }
 
       List<Pdil>? pdils = await dbHelper.getPdilList();
 
       int counter = 0;
       pdils!.forEach((row) {
         if (counter < 1) {
-          sheet.appendRow([
-            'NOMOR',
-            'IDPEL',
-            'NAMA',
-            'ALAMAT',
-            'TARIF',
-            'DAYA',
-            'NOHP',
-            'NIK',
-            'NPWP',
-            'CATATAN',
-            'TANGGALBACA',
-          ]);
+          // sheet?.appendRow([
+          //   'NOMOR',
+          //   'IDPEL',
+          //   'NAMA',
+          //   'ALAMAT',
+          //   'TARIF',
+          //   'DAYA',
+          //   'NOHP',
+          //   'NIK',
+          //   'NPWP',
+          //   'CATATAN',
+          //   'TANGGALBACA',
+          // ]);
         }
         counter++;
-        context.read<ExportDataBloc>().add(ExportDataExport(row: counter, maxRow: pdils.length, message: 'null'));
+        // context.read<ExportDataBloc>().add(ExportDataExport(
+        //       row: counter,
+        //       maxRow: pdils.length,
+        //       message: 'null',
+        //     ));
         var rows = [
           counter.toString(),
           ...row.toList(),
         ];
-        sheet.appendRow(rows);
+        // sheet?.appendRow(rows);
       });
 
       List<Directory>? listDirectory = await getExternalStorageDirectories(type: StorageDirectory.downloads);
 
-      var data = await excel.save();
+      var data = excel.save();
 
       // excel.encode().then((value) async {
       //   var file = File(listDirectory[0].path + '/$namaFile.xlsx');

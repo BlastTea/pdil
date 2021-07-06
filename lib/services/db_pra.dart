@@ -61,7 +61,7 @@ static DbPra? _dbPra;
 
   Future<Pdil?> selectWhere({String? idPel, String? noMeter}) async {
     Database? db = await this.database;
-    var mapList = await db!.query(tablePrabayar, where: idPel == null ? '$columnNoMeter=?' : '$columnIdPel=?', whereArgs: [noMeter ?? idPel]);
+    var mapList = await db!.query(tablePrabayar, where: idPel == null ? '$columnNoMeter=?' : '$columnIdPel=?', whereArgs: [idPel ?? noMeter]);
 
     Pdil? pdil;
     if (mapList.length == 1) {

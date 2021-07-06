@@ -48,8 +48,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                 SizedBox(height: 20),
                                 Text(
                                   "Penataan Data Induk Langganan",
-                                  style:
-                                      stateFontSize.subtitle!.copyWith(color: primaryColor, fontWeight: FontWeight.w600),
+                                  style: subtitle.copyWith(color: primaryColor, fontWeight: FontWeight.w600),
                                 )
                               ],
                             ),

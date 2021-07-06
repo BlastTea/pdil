@@ -16,7 +16,7 @@ class CurrentTextButton extends StatelessWidget {
         if (stateFontSize is FontSizeResult) {
           return Container(
             width: width ?? double.infinity,
-            height: 41 + stateFontSize.width!,
+            height: 41 + stateFontSize.width,
             decoration: decoration ?? cardDecoration.copyWith(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,

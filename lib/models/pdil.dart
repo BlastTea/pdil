@@ -66,7 +66,7 @@ class Pdil {
     tanggalBaca = map[columnTanggalBaca];
   }
 
-  List<String?> toList({bool isPasca = true, isExport = true}) => [
+  List<String?> toList({bool isPasca = true}) => [
         idPel,
         if (!isPasca) noMeter,
         nama,
@@ -78,7 +78,7 @@ class Pdil {
         npwp,
         email,
         catatan,
-        if(!isExport) tanggalBaca,
+        tanggalBaca,
       ];
 
   Pdil copyWith({
@@ -144,6 +144,6 @@ class Pdil {
 
   @override
   String toString() {
-    return 'Pdil(idPel : $idPel, noMeter : $noMeter, nama : $nama, alamat : $alamat, tarif : $tarip, daya : $daya, noHp : $noHp, nik : $nik, npwp : $npwp, email : $email, catatan : $catatan)';
+    return 'Pdil(idPel : $idPel, noMeter : $noMeter, nama : $nama, alamat : $alamat, tarif : $tarip, daya : $daya, noHp : $noHp, nik : $nik, npwp : $npwp, email : $email, catatan : $catatan, tanggalBaca : $tanggalBaca, isKoreksi : $isKoreksi)';
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdil/blocs/blocs.dart';
 import 'package:pdil/models/models.dart';
 import 'package:bloc/bloc.dart';
@@ -33,11 +35,21 @@ class InputDataBloc extends Bloc<InputDataEvent, InputDataState> {
       // print("pdil Excel nik : ${event.data.nik}");
       // print("pdil Excel npwp : ${event.data.npwp}");
 
-      double persentase = event.row! / event.maxRow;
-      if (event.isPasca!) {
+      double persentase = event.row! / event.maxRow!;
+      if (event.table == 'Pascabayar' || event.isPasca) {
         await dbPasca.insert(event.data!);
-      } else if (!event.isPasca!) {
+        if (event.isImportBoth && persentase == 1.0) {
+          BlocProvider.of<CustomerDataBloc>(event.context).add(FetchCustomerData());
+        } else if (persentase == 1.0) {
+          BlocProvider.of<CustomerDataBloc>(event.context).add(UpdateCustomerDataPasca());
+        }
+      } else if (event.table == 'Prabayar' || !event.isPasca) {
         await dbPra.insert(event.data!);
+        if (event.isImportBoth && persentase == 1.0) {
+          BlocProvider.of<CustomerDataBloc>(event.context).add(FetchCustomerData());
+        } else if (persentase == 1.0) {
+          BlocProvider.of<CustomerDataBloc>(event.context).add(UpdateCustomerDataPra());
+        }
       }
       yield InputDataProgress(progress: persentase);
     } else if (event is InputDataInit) {

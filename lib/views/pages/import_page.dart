@@ -1,6 +1,10 @@
 part of 'pages.dart';
 
 class ImportPage extends StatefulWidget {
+  factory ImportPage.design() = _ImportPageDesign;
+
+  ImportPage({Key? key}) : super(key: key);
+
   @override
   _ImportPageState createState() => _ImportPageState();
 }
@@ -11,13 +15,14 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
   late Animation<Offset> _animation;
 
   bool _isPasca = true;
+  bool isImportBoth = false;
 
   DateTime? _currentBackPressTime;
 
   FilePickerResult? result;
+
   String directory = "";
-  String? message;
-  DbPasca dbHelper = DbPasca();
+
   final List<List<String>> formatChecks = [
     ['IDPEL'],
     ['NAMA'],
@@ -28,9 +33,9 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
     ['NIK'],
     ['NPWP'],
     ['CATATAN'],
-    ['TANGGALBACA']
+    ['TANGGALBACA', 'TANGGAL BACA']
   ];
-
+  List<String> formatRows = [];
   List<int> formatIndexs = [];
 
   @override
@@ -88,43 +93,7 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
               },
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: ClipPath(
-                  clipper: ImportClipper(),
-                  child: Container(
-                    width: double.infinity,
-                    color: whiteColor,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _circleOpenFolder(context),
-                          SizedBox(height: 5),
-                          MyToggleButton(
-                            toggleButtonSlot: ToggleButtonSlot.import,
-                            onTap: (_isPasca) {
-                              if (!_isPasca) {
-                                this._isPasca = _isPasca;
-                                formatChecks.insert(1, ['NO METER']);
-                              }
-                            },
-                          ),
-                          SizedBox(height: 8),
-                          Material(
-                            child: CurrentTextField(
-                              controller: TextEditingController(text: directory),
-                              label: 'Nama File',
-                              readOnly: true,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          _prosesButton(context, stateFontSize),
-                          SizedBox(height: 17),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                child: design(context, stateFontSize),
               ),
             );
           }
@@ -133,6 +102,48 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
       ),
     );
   }
+
+  design(BuildContext context, FontSizeResult stateFontSize) => ClipPath(
+        clipper: ImportClipper(),
+        child: Container(
+          width: double.infinity,
+          color: whiteColor,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _circleOpenFolder(context),
+                SizedBox(height: 5),
+                CheckBoxImportBoth(
+                  isImportBoth: isImportBoth,
+                  isPasca: _isPasca,
+                  onCheckBoxTap: (isImportBoth) {
+                    this.isImportBoth = isImportBoth;
+                  },
+                  onToggleButtonTap: (isPasca) {
+                    _isPasca = isPasca;
+                  },
+                  formatChecks: formatChecks,
+                  stateFontSize: stateFontSize,
+                ),
+                SizedBox(height: 8),
+                Material(
+                  color: Colors.transparent,
+                  child: CurrentTextField(
+                    controller: TextEditingController(text: directory),
+                    label: 'Nama File',
+                    readOnly: true,
+                  ),
+                ),
+                SizedBox(height: 8),
+                _prosesButton(context, stateFontSize),
+                SizedBox(height: 17),
+              ],
+            ),
+          ),
+        ),
+      );
 
   _circleOpenFolder(BuildContext context) => Container(
         width: 74,
@@ -223,12 +234,6 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
 
                       Future.delayed(const Duration(milliseconds: 200)).then((value) {
                         context.read<InputDataBloc>().add(InputDataInit());
-
-                        if (_isPasca) {
-                          context.read<CustomerDataBloc>().add(UpdateCustomerDataPasca());
-                        } else if (!_isPasca) {
-                          context.read<CustomerDataBloc>().add(UpdateCustomerDataPra());
-                        }
                       });
                     });
                   }
@@ -295,76 +300,208 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
     }
   }
 
-  _inputDataToDatabase(BuildContext context) {
+  _inputDataToDatabase(BuildContext context) async {
     var file = result!.files.single.path!;
     var bytes = File(file).readAsBytesSync();
     var excel = Excel.decodeBytes(bytes);
-
     int counter = 0;
 
     for (var table in excel.tables.keys) {
-      for (var row in excel.tables[table]!.rows) {
-        print("pdil Row : $row");
-        Pdil pdilExcel;
-        if (counter > 0 && counter < 2) {
-          context.read<ImportBloc>().add(ImportConfirm(_isPasca ? Import.pascabayarImported : Import.prabayarImported, prefixIdPel: row[1].toString().substring(0, 5)));
+      if (isImportBoth && (table == 'Pascabayar' || table == 'Prabayar')) {
+        int maxPasca = 0;
+        int maxPra = 0;
+        excel.tables.forEach((key, value) {
+          if (key == 'Pascabayar') {
+            maxPasca = value.maxRows;
+          } else if (key == 'Prabayar') {
+            maxPra = value.maxRows;
+          }
+        });
+        counter = await _saveRowToDatabase(context, excel, table, counter, maxPasca: maxPasca, maxPra: maxPra);
+      } else if (_isPasca && table == 'Pascabayar' || _isPasca) {
+        counter = 0;
+        await _saveRowToDatabase(context, excel, table, counter);
+      } else if (!_isPasca && table == 'Prabayar' || !_isPasca) {
+        counter = 0;
+        await _saveRowToDatabase(context, excel, table, counter);
+      }
+    }
+  }
+
+  Future<int> _saveRowToDatabase(BuildContext context, Excel excel, String table, int counter, {int? maxPasca, int? maxPra}) {
+    for (var row in excel.tables[table]!.rows) {
+      Pdil pdilExcel;
+      if (row[0]!.rowIndex == 1) {
+        print('table $table, ${row[0]?.rowIndex}, ${table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? row[formatIndexs[0]]?.value.toString().substring(0, 5) : null}');
+        print('table : $table, ${row[0]?.rowIndex}, ${table == 'Prabayar' || !_isPasca ? row[formatIndexs[0]]?.value.toString().substring(0, 5) : null}');
+        context.read<ImportBloc>().add(
+              ImportConfirm(
+                isImportBoth
+                    ? Import.bothImported
+                    : _isPasca
+                        ? Import.pascabayarImported
+                        : Import.prabayarImported,
+                prefixIdPelPasca: table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? row[formatIndexs[0]]?.value.toString().substring(0, 5) : null,
+                prefixIdpelPra: table == 'Prabayar' || !_isPasca ? row[formatIndexs[0]]?.value.toString().substring(0, 5) : null,
+              ),
+            );
+      }
+      if (row[0]!.rowIndex > 0) {
+        pdilExcel = Pdil(
+          idPel: row[formatIndexs[0]]?.value.toString(),
+          noMeter: table == 'Prabayar' || !_isPasca ? row[formatIndexs[1]]?.value.toString() : null,
+          nama: row[formatIndexs[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 1 : 2]]?.value.toString(),
+          alamat: row[formatIndexs[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 2 : 3]]?.value.toString(),
+          tarip: row[formatIndexs[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 3 : 4]]?.value.toString(),
+          daya: row[formatIndexs[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 4 : 5]]?.value.toString().split(".")[0],
+          noHp: _getValueFromRow(context: context, column: formatChecks[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 5 : 6][0], row: row),
+          nik: _getValueFromRow(context: context, column: formatChecks[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 6 : 7][0], row: row),
+          npwp: _getValueFromRow(context: context, column: formatChecks[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 7 : 8][0], row: row),
+          catatan: _getValueFromRow(context: context, column: formatChecks[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 8 : 9][0], row: row),
+          tanggalBaca: _getValueFromRow(context: context, column: formatChecks[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 9 : 10][0], row: row),
+          isKoreksi: false,
+        );
+        context.read<InputDataBloc>().add(InputDataAdd(
+              data: pdilExcel,
+              row: counter + 1,
+              maxRow: isImportBoth && maxPasca != null && maxPra != null ? (maxPasca + maxPra) : excel.tables[table]?.maxRows,
+              table: table,
+              isPasca: isImportBoth ? false : _isPasca,
+              isImportBoth: isImportBoth,
+              context: context,
+            ));
+      } else if (row[0]?.rowIndex == 0) {
+        formatRows = [];
+        if ((table == 'Prabayar' || !_isPasca) && formatChecks.length == 10) {
+          formatChecks.insert(1, ['NO METER']);
+        } else if (formatChecks.length > 10) {
+          formatChecks.removeAt(1);
         }
-        if (counter > 0) {
-          pdilExcel = Pdil(
-            idPel: row[formatIndexs[0]].toString(),
-            noMeter: !_isPasca ? row[formatIndexs[1]].toString() : null,
-            nama: _isPasca ? row[formatIndexs[1]].toString() : row[formatIndexs[2]].toString(),
-            alamat: _isPasca ? row[formatIndexs[2]].toString() : row[formatIndexs[3]].toString(),
-            tarip: _isPasca ? row[formatIndexs[3]].toString() : row[formatIndexs[4]].toString(),
-            daya: _isPasca ? row[formatIndexs[4]].toString() : row[formatIndexs[5]].toString().split(".")[0],
-            // noHp: formatIndexs.length == 10
-            //     ? _isPasca
-            //         ? row[formatIndexs[5]]
-            //         : row[formatIndexs[6]]
-            //     : null,
-            // nik: formatIndexs.length == 10
-            //     ? _isPasca
-            //         ? row[formatIndexs[6]]
-            //         : row[formatIndexs[7]]
-            //     : null,
-            // npwp: formatIndexs.length == 10
-            //     ? _isPasca
-            //         ? row[formatIndexs[7]]
-            //         : row[formatIndexs[8]]
-            //     : null,
-            // catatan: formatIndexs.length == 10
-            //     ? _isPasca
-            //         ? row[formatIndexs[8]]
-            //         : row[formatIndexs[9]]
-            //     : null,
-            // tanggalBaca: formatIndexs.length == 10
-            //     ? _isPasca
-            //         ? row[formatIndexs[9]]
-            //         : row[formatIndexs[10]]
-            //     : null,
-            isKoreksi: false,
-          );
-          context.read<InputDataBloc>().add(InputDataAdd(
-                data: pdilExcel,
-                row: counter + 1,
-                maxRow: excel.tables[table]!.maxRows,
-                isPasca: _isPasca,
-              ));
-        } else if (counter < 1) {
-          for (int i = 0; i < row.length; i++) {
-            formatChecksLoop:
-            for (int j = 0; j < formatChecks.length; j++) {
-              for (int k = 0; k < formatChecks[j].length; k++) {
-                if (row[i] == formatChecks[j][k]) {
-                  formatIndexs.add(i);
-                  break formatChecksLoop;
-                }
+        for (int i = 0; i < row.length; i++) {
+          formatChecksLoop:
+          for (int j = 0; j < formatChecks.length; j++) {
+            for (int k = 0; k < formatChecks[j].length; k++) {
+              if (row[i]?.value == formatChecks[j][k]) {
+                formatIndexs.add(i);
+                formatRows.add(formatChecks[j][k]);
+                break formatChecksLoop;
               }
             }
           }
         }
-        counter++;
+      }
+      counter++;
+    }
+    return Future.value(counter);
+  }
+
+  String? _getValueFromRow({required BuildContext context, required String column, required List<Data?> row}) {
+    int? indexRow = _getIndexFromFormatRows(context, column);
+    if (indexRow != null) {
+      return row[formatIndexs[indexRow]]?.value.toString();
+    }
+    return null;
+  }
+
+  int? _getIndexFromFormatRows(BuildContext context, String column) {
+    for (int i = 0; i < formatRows.length; i++) {
+      if (column == formatRows[i]) {
+        return i;
       }
     }
+    return null;
+  }
+}
+
+class CheckBoxImportBoth extends StatefulWidget {
+  CheckBoxImportBoth({
+    Key? key,
+    required this.isImportBoth,
+    required this.isPasca,
+    required this.onCheckBoxTap,
+    required this.onToggleButtonTap,
+    required this.formatChecks,
+    required this.stateFontSize,
+  }) : super(key: key);
+
+  bool isImportBoth;
+  bool isPasca;
+  Function(bool) onCheckBoxTap;
+  Function(bool) onToggleButtonTap;
+  List<List<String>> formatChecks;
+  FontSizeResult stateFontSize;
+
+  @override
+  CheckBoxImportBothState createState() => CheckBoxImportBothState();
+}
+
+class CheckBoxImportBothState extends State<CheckBoxImportBoth> {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ImportBloc, ImportState>(
+      builder: (_, importState) {
+        return Material(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (importState is ImportBothNotImported)
+                Transform(
+                  transform: Matrix4.translationValues(-12.0, 0.0, 0.0),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: widget.isImportBoth,
+                        onChanged: (newValue) {
+                          setState(() {
+                            widget.isImportBoth = newValue!;
+                            widget.onCheckBoxTap(newValue);
+                          });
+                        },
+                      ),
+                      Text('Import keduanya', style: widget.stateFontSize.body1),
+                    ],
+                  ),
+                ),
+              if (!widget.isImportBoth)
+                MyToggleButton(
+                  toggleButtonSlot: ToggleButtonSlot.import,
+                  onTap: (_isPasca) {
+                    widget.isPasca = _isPasca;
+                    if (!_isPasca) {
+                      widget.formatChecks.insert(1, ['NO METER']);
+                    } else if (widget.formatChecks.length > 10) {
+                      widget.formatChecks.removeAt(1);
+                    }
+                    widget.onToggleButtonTap(_isPasca);
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ImportPageDesign extends ImportPage {
+  _ImportPageDesign({Key? key}) : super(key: key);
+
+  @override
+  _ImportPageState createState() => _ImportPageDesignState();
+}
+
+class _ImportPageDesignState extends _ImportPageState {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<FontSizeBloc, FontSizeState>(
+      builder: (_, stateFontSize) {
+        if (stateFontSize is FontSizeResult) {
+          return super.design(context, stateFontSize);
+        }
+        return Container();
+      },
+    );
   }
 }

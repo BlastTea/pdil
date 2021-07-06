@@ -15,6 +15,7 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
   late AnimationController _animationControllerPasca;
   late AnimationController _animationControllerPra;
 
+  late Animation _animation;
   late Animation<Color?> _animationPascaColor;
   late Animation<Color?> _animationPraColor;
 
@@ -26,15 +27,16 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 200),
     );
+    _animation = CurvedAnimation(parent: _animationController, curve: Curves.fastOutSlowIn);
     _animationControllerPasca = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 200),
     );
     _animationControllerPra = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 200),
     );
     _animationPascaColor = ColorTween(begin: whiteColor, end: primaryColor).animate(_animationControllerPasca);
     _animationPraColor = ColorTween(begin: primaryColor, end: whiteColor).animate(_animationControllerPra);
@@ -48,7 +50,7 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
     return BlocBuilder<FontSizeBloc, FontSizeState>(
       builder: (_, stateFontSize) {
         if (stateFontSize is FontSizeResult) {
-          final double kWidth = (MediaQuery.of(context).size.width / 2) + (stateFontSize.title!.fontSize! - 20);
+          final double kWidth = ((MediaQuery.of(context).size.width / 2) + stateFontSize.width) * 1.6;
           return FutureBuilder<Import>(
             future: ImportServices.getCurrentImport(),
             builder: (_, snapshot) {
@@ -103,10 +105,10 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
                         children: [
                           Container(
                             width: kWidth,
-                            height: 32,
+                            height: 32 + stateFontSize.width,
                             decoration: BoxDecoration(
                               color: whiteColor,
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(16 + stateFontSize.width),
                               border: Border.all(color: primaryColor),
                             ),
                           ),
@@ -114,17 +116,17 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
                             animation: _animationController,
                             builder: (_, child) {
                               return Positioned(
-                                left: (kWidth / 2 - 8.0) * _animationController.value,
+                                left: (kWidth / 2 - 8.0) * _animation.value,
                                 child: child!,
                               );
                             },
                             child: Container(
                               width: kWidth / 2,
-                              height: 24,
+                              height: 24 + stateFontSize.width ,
                               margin: const EdgeInsets.all(4.0),
                               decoration: BoxDecoration(
                                 color: primaryColor,
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(14 + stateFontSize.width),
                               ),
                             ),
                           ),

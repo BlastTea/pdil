@@ -1,0 +1,35 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "pdil",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "pdil (huawei)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "deviceId": "58DRK18906007505"
+        },
+        {
+            "name": "pdil (emulator)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "deviceId": "emulator-5556"
+        },
+    ], "compounds": [
+        {
+            "name": "all devices",
+            "configurations": [
+                "pdil (huawei)",
+                "pdil (emulator)",
+            ]
+        }
+    ]
+}

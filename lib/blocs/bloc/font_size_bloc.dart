@@ -10,7 +10,7 @@ part 'font_size_event.dart';
 part 'font_size_state.dart';
 
 class FontSizeBloc extends Bloc<FontSizeEvent, FontSizeState> {
-  FontSizeBloc() : super(FontSizeResult(title: title, subtitle: subtitle, body1: body1));
+  FontSizeBloc() : super(FontSizeResult(title: title, subtitle: subtitle, body1: body1, body2: body2, width: 0));
 
   @override
   Stream<FontSizeState> mapEventToState(FontSizeEvent event) async* {

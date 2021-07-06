@@ -17,3 +17,4 @@ part 'font_size_services.dart';
 part 'input_service.dart';
 part 'search_services.dart';
 part 'toggle_button_services.dart';
+part 'date_picker_service.dart';

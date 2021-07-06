@@ -10,7 +10,7 @@ part 'pdil_state.dart';
 class PdilBloc extends Bloc<PdilEvent, PdilState> {
   DbPasca dbPasca = DbPasca();
   DbPra dbPra = DbPra();
-    
+
   Pdil? currentPdilPasca;
   Pdil? originalPdilPasca;
   Pdil? currentPdilPra;
@@ -23,7 +23,18 @@ class PdilBloc extends Bloc<PdilEvent, PdilState> {
     if (event is FetchPdil) {
       if (event.isPasca) {
         originalPdilPasca = await dbPasca.selectWhere(event.idPel);
-        if (originalPdilPasca == null) {
+        if (originalPdilPasca == null && event.isContinuingSearch) {
+          yield PdilLoaded(
+            originalPdilPasca: originalPdilPasca,
+            currentPdilPasca: currentPdilPasca,
+            originalPdilPra: originalPdilPra,
+            currentPdilPra: currentPdilPra,
+            isFromCustomerData: event.isFromCustomerData,
+            isContinuingSearch: event.isContinuingSearch,
+            isPasca: event.isPasca,
+            isClearState: true,
+          );
+        } else if (originalPdilPasca == null) {
           yield PdilError('Data Tidak Ditemukan', isContinuingSearch: event.isContinuingSearch);
         } else if (originalPdilPasca != null) {
           currentPdilPasca = originalPdilPasca!.copyWith();
@@ -33,13 +44,24 @@ class PdilBloc extends Bloc<PdilEvent, PdilState> {
             originalPdilPra: originalPdilPra,
             currentPdilPra: currentPdilPra,
             isFromCustomerData: event.isFromCustomerData,
-            isContinousSearch: event.isContinuingSearch,
+            isContinuingSearch: event.isContinuingSearch,
             isPasca: event.isPasca,
           );
         }
       } else if (!event.isPasca) {
         originalPdilPra = await dbPra.selectWhere(idPel: event.idPel, noMeter: event.noMeter);
-        if (originalPdilPra == null) {
+        if (originalPdilPra == null && event.isContinuingSearch) {
+          yield PdilLoaded(
+            originalPdilPasca: originalPdilPasca,
+            currentPdilPasca: currentPdilPasca,
+            originalPdilPra: originalPdilPra,
+            currentPdilPra: currentPdilPra,
+            isFromCustomerData: event.isFromCustomerData,
+            isContinuingSearch: event.isContinuingSearch,
+            isPasca: event.isPasca,
+            isClearState: true,
+          );
+        } else if (originalPdilPra == null) {
           yield PdilError('Data Tidak Ditemukan', isContinuingSearch: event.isContinuingSearch);
         } else if (originalPdilPra != null) {
           currentPdilPra = originalPdilPra!.copyWith();
@@ -49,12 +71,18 @@ class PdilBloc extends Bloc<PdilEvent, PdilState> {
             originalPdilPra: originalPdilPra,
             currentPdilPra: currentPdilPra,
             isFromCustomerData: event.isFromCustomerData,
-            isContinousSearch: event.isContinuingSearch,
+            isContinuingSearch: event.isContinuingSearch,
             isPasca: event.isPasca,
+            isIdpel: event.idPel == null,
           );
         }
       }
     } else if (event is UpdatePdil) {
+      String? startDate = await DatePickerService.getStartDate();
+      if (startDate == null) {
+        DatePickerService.saveStartDate(event.pdil?.tanggalBaca as String);
+      }
+      DatePickerService.saveEndDate(event.pdil?.tanggalBaca as String);
       if (event.isPasca) {
         int count = await dbPasca.update(event.pdil!);
         yield PdilOnUpdate(count, event.isUsingSaveDialog);
@@ -74,7 +102,7 @@ class PdilBloc extends Bloc<PdilEvent, PdilState> {
 
       yield UpdatedPdilController(
         currentPdilPasca: event.currentPdilPasca,
-        originalPdilPasca: event.originalPdilPra,
+        originalPdilPasca: event.originalPdilPasca,
         currentPdilPra: event.currentPdilPra,
         originalPdilPra: event.originalPdilPra,
         isPasca: event.isPasca,
