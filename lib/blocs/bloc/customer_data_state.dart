@@ -10,13 +10,13 @@ class CustomerDataResult extends CustomerDataState {
   final List<Pdil>? pdilPra;
   final String? searchResult;
   final String? column;
-  final bool isSetIxExpandNull;
+  final bool isSetIsExpandNull;
 
   CustomerDataResult({
     required this.pdilPasca,
     required this.pdilPra,
     this.searchResult,
     this.column,
-    this.isSetIxExpandNull = false,
+    this.isSetIsExpandNull = false,
   });
 }

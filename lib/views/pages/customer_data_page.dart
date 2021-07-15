@@ -24,9 +24,10 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                   child: CircularProgressIndicator(),
                 );
               } else if (stateCustomerData is CustomerDataResult) {
-                if (stateCustomerData.isSetIxExpandNull) {
+                if (stateCustomerData.isSetIsExpandNull) {
                   isExpandPascas = null;
                   isExpandPras = null;
+                  context.read<CustomerDataBloc>().add(UpdateIsExpandNull(isSetIsExpandNull: false));
                 }
                 if (isExpandPascas == null) {
                   isExpandPascas = List.generate(stateCustomerData.pdilPasca?.length ?? 0, (index) => false);
@@ -64,8 +65,9 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                     (index) => AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.fastOutSlowIn,
-                      width: double.infinity,
-                      height: _getHeightIsExpand(context, index, stateFontSize),
+                      width: MediaQuery.of(context).size.width,
+                      // height: _getHeightIsExpand(context, index, stateFontSize),
+                      // height: null,
                       margin: EdgeInsets.fromLTRB(defaultPadding, 15, defaultPadding, _getBottomMargin(context, index, stateCustomerData)),
                       decoration: cardDecoration.copyWith(
                         border: Border.all(color: primaryColor),
@@ -80,51 +82,51 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 5.0),
-                                      ...List.generate(!_isPasca ? 3 : 2, (indexText) {
-                                        if (_getIsExpand(context, index)) {
-                                          return Row(
-                                            children: [
-                                              SizedBox(
-                                                width: 70 + (stateFontSize.width * (_isPasca ? 3.0 : 5.0)),
-                                                child: Text(
-                                                  [
-                                                    'Idpel',
-                                                    _isPasca ? 'Nama' : 'No Meter',
-                                                    if (!_isPasca) 'Nama',
-                                                  ][indexText],
-                                                  style: stateFontSize.body1!.copyWith(color: greyColor),
-                                                ),
-                                              ),
-                                              Text(
-                                                ' : ',
-                                                style: stateFontSize.body1!.copyWith(color: greyColor),
-                                              ),
-                                              SizedBox(
-                                                width: MediaQuery.of(context).size.width * (_isPasca ? 0.3 : 0.299),
-                                                child: SingleChildScrollView(
-                                                  scrollDirection: Axis.horizontal,
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width - 158,
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 5.0),
+                                        ...List.generate(!_isPasca ? 3 : 2, (indexText) {
+                                          if (_getIsExpand(context, index)) {
+                                            return Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: 70 + (stateFontSize.width * (_isPasca ? 3.0 : 5.0)),
                                                   child: Text(
                                                     [
-                                                      _isPasca ? stateCustomerData.pdilPasca![index].idPel : stateCustomerData.pdilPra![index].idPel,
-                                                      _isPasca ? stateCustomerData.pdilPasca![index].nama : stateCustomerData.pdilPra![index].noMeter,
-                                                      if (!_isPasca) stateCustomerData.pdilPra![index].nama,
-                                                    ][indexText]!,
-                                                    style: stateFontSize.body1,
+                                                      'Idpel',
+                                                      _isPasca ? 'Nama' : 'No Meter',
+                                                      if (!_isPasca) 'Nama',
+                                                    ][indexText],
+                                                    style: stateFontSize.body1!.copyWith(color: greyColor),
                                                   ),
                                                 ),
-                                              ),
-                                            ],
-                                          );
-                                        } else {
-                                          if (_isPasca) {
-                                            return SizedBox(
-                                              width: MediaQuery.of(context).size.width * 0.5,
-                                              child: SingleChildScrollView(
+                                                Text(
+                                                  ' : ',
+                                                  style: stateFontSize.body1!.copyWith(color: greyColor),
+                                                ),
+                                                SizedBox(
+                                                  width: MediaQuery.of(context).size.width - ((238 + (_isPasca ? 0 : 14)) + (stateFontSize.width * 4)),
+                                                  child: SingleChildScrollView(
+                                                    scrollDirection: Axis.horizontal,
+                                                    child: Text(
+                                                      [
+                                                        _isPasca ? stateCustomerData.pdilPasca![index].idPel : stateCustomerData.pdilPra![index].idPel,
+                                                        _isPasca ? stateCustomerData.pdilPasca![index].nama : stateCustomerData.pdilPra![index].noMeter,
+                                                        if (!_isPasca) stateCustomerData.pdilPra![index].nama,
+                                                      ][indexText]!,
+                                                      style: stateFontSize.body1,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          } else {
+                                            if (_isPasca) {
+                                              return SingleChildScrollView(
                                                 scrollDirection: Axis.horizontal,
                                                 child: Text(
                                                   [
@@ -133,12 +135,9 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                                                   ][indexText]!,
                                                   style: stateFontSize.body1,
                                                 ),
-                                              ),
-                                            );
-                                          } else if (!_isPasca) {
-                                            return SizedBox(
-                                              width: MediaQuery.of(context).size.width * 0.615,
-                                              child: SingleChildScrollView(
+                                              );
+                                            } else if (!_isPasca) {
+                                              return SingleChildScrollView(
                                                 child: Text(
                                                   [
                                                     stateCustomerData.pdilPra![index].idPel,
@@ -147,13 +146,13 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                                                   ][indexText]!,
                                                   style: stateFontSize.body1,
                                                 ),
-                                              ),
-                                            );
+                                              );
+                                            }
                                           }
-                                        }
-                                        return Container();
-                                      })
-                                    ],
+                                          return Container();
+                                        })
+                                      ],
+                                    ),
                                   ),
                                   Row(
                                     children: [
@@ -182,10 +181,8 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                                           onPressed: (newValue) {
                                             setState(() {
                                               if (_isPasca) {
-                                                print('expand Pasca');
                                                 isExpandPascas![index] = !isExpandPascas![index];
                                               } else {
-                                                print('expand Pra');
                                                 isExpandPras![index] = !isExpandPras![index];
                                               }
                                             });

@@ -8,6 +8,7 @@ import 'package:pdil/models/models.dart';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:pdil/services/services.dart';
+import 'package:pdil/utils/utils.dart';
 import 'package:sqflite/sqflite.dart';
 
 part 'input_data_event.dart';
@@ -36,14 +37,14 @@ class InputDataBloc extends Bloc<InputDataEvent, InputDataState> {
       // print("pdil Excel npwp : ${event.data.npwp}");
 
       double persentase = event.row! / event.maxRow!;
-      if (event.table == 'Pascabayar' || event.isPasca) {
+      if (event.table?.toLowerCase() == tablePascabayar.toLowerCase() || event.isPasca) {
         await dbPasca.insert(event.data!);
         if (event.isImportBoth && persentase == 1.0) {
           BlocProvider.of<CustomerDataBloc>(event.context).add(FetchCustomerData());
         } else if (persentase == 1.0) {
           BlocProvider.of<CustomerDataBloc>(event.context).add(UpdateCustomerDataPasca());
         }
-      } else if (event.table == 'Prabayar' || !event.isPasca) {
+      } else if (event.table?.toLowerCase() == tablePrabayar.toLowerCase() || !event.isPasca) {
         await dbPra.insert(event.data!);
         if (event.isImportBoth && persentase == 1.0) {
           BlocProvider.of<CustomerDataBloc>(event.context).add(FetchCustomerData());

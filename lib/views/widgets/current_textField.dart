@@ -16,11 +16,13 @@ class CurrentTextField extends StatefulWidget {
   final Function(String text)? onSubmitted;
   final Function(String text)? onChanged;
   final Function? onCancelTap;
+  final Function()? onTap;
   final TextInputAction? textInputAction;
   final int? maxLines;
   final int? minLines;
   final EdgeInsetsGeometry? padding;
   final Widget? prefixIcon;
+  final bool autofocus;
 
   CurrentTextField({
     this.controller,
@@ -43,6 +45,8 @@ class CurrentTextField extends StatefulWidget {
     this.padding,
     this.prefixIcon,
     this.onCancelTap,
+    this.onTap,
+    this.autofocus = false,
   });
 
   @override
@@ -95,6 +99,8 @@ class _CurrentTextFieldState extends State<CurrentTextField> {
                     }
                     widget.onChanged!(value);
                   },
+                  autofocus: widget.autofocus,
+                  onTap: widget.onTap ?? () {},
                   keyboardType: widget.keyboardType,
                   scrollController: widget.scrollController,
                   controller: widget.controller,

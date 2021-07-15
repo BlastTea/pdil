@@ -283,7 +283,7 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
   _pickFile(BuildContext context) async {
     result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['xlsx', 'xltx'],
+      allowedExtensions: ['xlsx', 'xltx', 'xls'],
       allowMultiple: false,
     );
 
@@ -307,21 +307,21 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
     int counter = 0;
 
     for (var table in excel.tables.keys) {
-      if (isImportBoth && (table == 'Pascabayar' || table == 'Prabayar')) {
+      if (isImportBoth && (table.toLowerCase() == tablePascabayar.toLowerCase() || table.toLowerCase() == tablePrabayar.toLowerCase())) {
         int maxPasca = 0;
         int maxPra = 0;
         excel.tables.forEach((key, value) {
-          if (key == 'Pascabayar') {
+          if (key.toLowerCase() == tablePascabayar.toLowerCase()) {
             maxPasca = value.maxRows;
-          } else if (key == 'Prabayar') {
+          } else if (key.toLowerCase() == tablePrabayar.toLowerCase()) {
             maxPra = value.maxRows;
           }
         });
         counter = await _saveRowToDatabase(context, excel, table, counter, maxPasca: maxPasca, maxPra: maxPra);
-      } else if (_isPasca && table == 'Pascabayar' || _isPasca) {
+      } else if (_isPasca && table.toLowerCase() == tablePascabayar.toLowerCase() || _isPasca) {
         counter = 0;
         await _saveRowToDatabase(context, excel, table, counter);
-      } else if (!_isPasca && table == 'Prabayar' || !_isPasca) {
+      } else if (!_isPasca && table.toLowerCase() == tablePrabayar.toLowerCase() || !_isPasca) {
         counter = 0;
         await _saveRowToDatabase(context, excel, table, counter);
       }
@@ -332,8 +332,6 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
     for (var row in excel.tables[table]!.rows) {
       Pdil pdilExcel;
       if (row[0]!.rowIndex == 1) {
-        print('table $table, ${row[0]?.rowIndex}, ${table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? row[formatIndexs[0]]?.value.toString().substring(0, 5) : null}');
-        print('table : $table, ${row[0]?.rowIndex}, ${table == 'Prabayar' || !_isPasca ? row[formatIndexs[0]]?.value.toString().substring(0, 5) : null}');
         context.read<ImportBloc>().add(
               ImportConfirm(
                 isImportBoth
@@ -341,24 +339,24 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
                     : _isPasca
                         ? Import.pascabayarImported
                         : Import.prabayarImported,
-                prefixIdPelPasca: table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? row[formatIndexs[0]]?.value.toString().substring(0, 5) : null,
-                prefixIdpelPra: table == 'Prabayar' || !_isPasca ? row[formatIndexs[0]]?.value.toString().substring(0, 5) : null,
+                prefixIdPelPasca: table.toLowerCase() == tablePascabayar.toLowerCase() || (isImportBoth ? false : _isPasca) ? row[formatIndexs[0]]?.value.toString().substring(0, 5) : null,
+                prefixIdpelPra: table.toLowerCase() == tablePrabayar.toLowerCase() || !_isPasca ? row[formatIndexs[0]]?.value.toString().substring(0, 5) : null,
               ),
             );
       }
       if (row[0]!.rowIndex > 0) {
         pdilExcel = Pdil(
           idPel: row[formatIndexs[0]]?.value.toString(),
-          noMeter: table == 'Prabayar' || !_isPasca ? row[formatIndexs[1]]?.value.toString() : null,
-          nama: row[formatIndexs[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 1 : 2]]?.value.toString(),
-          alamat: row[formatIndexs[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 2 : 3]]?.value.toString(),
-          tarip: row[formatIndexs[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 3 : 4]]?.value.toString(),
-          daya: row[formatIndexs[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 4 : 5]]?.value.toString().split(".")[0],
-          noHp: _getValueFromRow(context: context, column: formatChecks[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 5 : 6][0], row: row),
-          nik: _getValueFromRow(context: context, column: formatChecks[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 6 : 7][0], row: row),
-          npwp: _getValueFromRow(context: context, column: formatChecks[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 7 : 8][0], row: row),
-          catatan: _getValueFromRow(context: context, column: formatChecks[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 8 : 9][0], row: row),
-          tanggalBaca: _getValueFromRow(context: context, column: formatChecks[table == 'Pascabayar' || (isImportBoth ? false : _isPasca) ? 9 : 10][0], row: row),
+          noMeter: table.toLowerCase() == tablePrabayar.toLowerCase() || !_isPasca ? row[formatIndexs[1]]?.value.toString() : null,
+          nama: row[formatIndexs[table.toLowerCase() == tablePascabayar.toLowerCase() || (isImportBoth ? false : _isPasca) ? 1 : 2]]?.value.toString(),
+          alamat: row[formatIndexs[table.toLowerCase() == tablePascabayar.toLowerCase() || (isImportBoth ? false : _isPasca) ? 2 : 3]]?.value.toString(),
+          tarip: row[formatIndexs[table.toLowerCase() == tablePascabayar.toLowerCase() || (isImportBoth ? false : _isPasca) ? 3 : 4]]?.value.toString(),
+          daya: row[formatIndexs[table.toLowerCase() == tablePascabayar.toLowerCase() || (isImportBoth ? false : _isPasca) ? 4 : 5]]?.value.toString().split(".")[0],
+          noHp: _getValueFromRow(context: context, column: formatChecks[table.toLowerCase() == tablePascabayar.toLowerCase() || (isImportBoth ? false : _isPasca) ? 5 : 6][0], row: row),
+          nik: _getValueFromRow(context: context, column: formatChecks[table.toLowerCase() == tablePascabayar.toLowerCase() || (isImportBoth ? false : _isPasca) ? 6 : 7][0], row: row),
+          npwp: _getValueFromRow(context: context, column: formatChecks[table.toLowerCase() == tablePascabayar.toLowerCase() || (isImportBoth ? false : _isPasca) ? 7 : 8][0], row: row),
+          catatan: _getValueFromRow(context: context, column: formatChecks[table.toLowerCase() == tablePascabayar.toLowerCase() || (isImportBoth ? false : _isPasca) ? 8 : 9][0], row: row),
+          tanggalBaca: _getValueFromRow(context: context, column: formatChecks[table.toLowerCase() == tablePascabayar.toLowerCase() || (isImportBoth ? false : _isPasca) ? 9 : 10][0], row: row),
           isKoreksi: false,
         );
         context.read<InputDataBloc>().add(InputDataAdd(
@@ -372,7 +370,8 @@ class _ImportPageState extends State<ImportPage> with SingleTickerProviderStateM
             ));
       } else if (row[0]?.rowIndex == 0) {
         formatRows = [];
-        if ((table == 'Prabayar' || !_isPasca) && formatChecks.length == 10) {
+        formatIndexs = [];
+        if ((table.toLowerCase() == tablePrabayar.toLowerCase() || !_isPasca) && formatChecks.length == 10) {
           formatChecks.insert(1, ['NO METER']);
         } else if (formatChecks.length > 10) {
           formatChecks.removeAt(1);

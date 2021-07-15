@@ -20,7 +20,6 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
   late Animation<Color?> _animationPraColor;
 
   bool _isPasca = true;
-  bool initIsPascaState = true;
 
   @override
   void initState() {
@@ -40,9 +39,7 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
     );
     _animationPascaColor = ColorTween(begin: whiteColor, end: primaryColor).animate(_animationControllerPasca);
     _animationPraColor = ColorTween(begin: primaryColor, end: whiteColor).animate(_animationControllerPra);
-    if (widget.toggleButtonSlot == ToggleButtonSlot.inputData || widget.toggleButtonSlot == ToggleButtonSlot.showData) {
-      context.read<ToggleButtonBloc>().add(FetchCurrentToggleButtonState(toggleButtonSlot: widget.toggleButtonSlot));
-    }
+    initIsPascaState();
   }
 
   @override
@@ -51,142 +48,89 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
       builder: (_, stateFontSize) {
         if (stateFontSize is FontSizeResult) {
           final double kWidth = ((MediaQuery.of(context).size.width / 2) + stateFontSize.width) * 1.6;
-          return FutureBuilder<Import>(
-            future: ImportServices.getCurrentImport(),
-            builder: (_, snapshot) {
-              if (snapshot.hasData) {
-                _isPasca = _getIspasca(context, snapshot.data, widget.toggleButtonSlot);
-                WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-                  if (!_isPasca) {
-                    _animatePrabayar(context);
-                    widget.onTap(_isPasca);
-                  }
-                });
-                return BlocBuilder<ToggleButtonBloc, ToggleButtonState>(
-                  builder: (_, stateToggleButton) {
-                    if (stateToggleButton is ToggleButtonResult) {
-                      if ((widget.toggleButtonSlot == ToggleButtonSlot.inputData || widget.toggleButtonSlot == ToggleButtonSlot.showData) && initIsPascaState) {
-                        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-                          _isPasca = stateToggleButton.isPasca;
-                          if (!_isPasca) {
-                            _animatePrabayar(context);
-                            widget.onTap(_isPasca);
-                          }
-                          initIsPascaState = false;
-                        });
-                      }
-                    } else if (stateToggleButton is ChangedCurrentToggleButtonState) {
-                      if (stateToggleButton.toggleButtonSlot == widget.toggleButtonSlot) {
-                        _isPasca = stateToggleButton.isPasca;
-                        if (_isPasca) {
-                          switch (widget.toggleButtonSlot) {
-                            case ToggleButtonSlot.import:
-                              break;
-                            case ToggleButtonSlot.export:
-                              break;
-                            case ToggleButtonSlot.showData:
-                              ToggleButtonServices.saveShowData(_isPasca);
-                              break;
-                            case ToggleButtonSlot.inputData:
-                              ToggleButtonServices.saveInputData(_isPasca);
-                              break;
-                          }
-                        } else {
-                          WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-                            _animatePrabayar(context);
-                          });
-                        }
-                      }
-                    }
-                    return SizedBox(
-                      width: kWidth,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: kWidth,
-                            height: 32 + stateFontSize.width,
-                            decoration: BoxDecoration(
-                              color: whiteColor,
-                              borderRadius: BorderRadius.circular(16 + stateFontSize.width),
-                              border: Border.all(color: primaryColor),
-                            ),
-                          ),
-                          AnimatedBuilder(
-                            animation: _animationController,
-                            builder: (_, child) {
-                              return Positioned(
-                                left: (kWidth / 2 - 8.0) * _animation.value,
-                                child: child!,
-                              );
-                            },
-                            child: Container(
-                              width: kWidth / 2,
-                              height: 24 + stateFontSize.width ,
-                              margin: const EdgeInsets.all(4.0),
-                              decoration: BoxDecoration(
-                                color: primaryColor,
-                                borderRadius: BorderRadius.circular(14 + stateFontSize.width),
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              GestureDetector(
-                                onTap: () async {
-                                  _onPascaPraPressed(context, snapshot.data, true);
-                                },
-                                child: SizedBox(
-                                  width: kWidth / 2,
-                                  child: AnimatedBuilder(
-                                    animation: _animationController,
-                                    builder: (_, child) {
-                                      return DefaultTextStyle(
-                                        style: stateFontSize.body1!.copyWith(color: _animationPascaColor.value),
-                                        child: child!,
-                                      );
-                                    },
-                                    child: Text(
-                                      'PascaBayar',
-                                      softWrap: true,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () async {
-                                  _onPascaPraPressed(context, snapshot.data, false);
-                                },
-                                child: AnimatedBuilder(
-                                  animation: _animationController,
-                                  builder: (_, child) {
-                                    return DefaultTextStyle(
-                                      style: stateFontSize.body1!.copyWith(color: _animationPraColor.value),
-                                      child: child!,
-                                    );
-                                  },
-                                  child: SizedBox(
-                                    width: kWidth / 2,
-                                    child: Text(
-                                      'PraBayar',
-                                      softWrap: true,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+          return SizedBox(
+            width: kWidth,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: kWidth,
+                  height: 32 + stateFontSize.width,
+                  decoration: BoxDecoration(
+                    color: whiteColor,
+                    borderRadius: BorderRadius.circular(16 + stateFontSize.width),
+                    border: Border.all(color: primaryColor),
+                  ),
+                ),
+                AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (_, child) {
+                    return Positioned(
+                      left: (kWidth / 2 - 8.0) * _animation.value,
+                      child: child!,
                     );
                   },
-                );
-              }
-              return Container();
-            },
+                  child: Container(
+                    width: kWidth / 2,
+                    height: 24 + stateFontSize.width,
+                    margin: const EdgeInsets.all(4.0),
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(14 + stateFontSize.width),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        _onPascaPraPressed(context, true);
+                      },
+                      child: SizedBox(
+                        width: kWidth / 2,
+                        child: AnimatedBuilder(
+                          animation: _animationController,
+                          builder: (_, child) {
+                            return DefaultTextStyle(
+                              style: stateFontSize.body1!.copyWith(color: _animationPascaColor.value),
+                              child: child!,
+                            );
+                          },
+                          child: Text(
+                            'PascaBayar',
+                            softWrap: true,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        _onPascaPraPressed(context, false);
+                      },
+                      child: AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (_, child) {
+                          return DefaultTextStyle(
+                            style: stateFontSize.body1!.copyWith(color: _animationPraColor.value),
+                            child: child!,
+                          );
+                        },
+                        child: SizedBox(
+                          width: kWidth / 2,
+                          child: Text(
+                            'PraBayar',
+                            softWrap: true,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           );
         }
         return Container();
@@ -226,10 +170,10 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
     return true;
   }
 
-  _onPascaPraPressed(BuildContext context, Import? currentImport, bool isPaca) {
+  _onPascaPraPressed(BuildContext context, bool isPaca) async {
+    Import currentImport = await ImportServices.getCurrentImport();
     if (isPaca) {
       // Pascabayar pressed
-
       switch (widget.toggleButtonSlot) {
         case ToggleButtonSlot.import:
           if (currentImport == Import.pascabayarImported) {
@@ -262,7 +206,6 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
       }
     } else {
       // Prabayar pressed
-
       switch (widget.toggleButtonSlot) {
         case ToggleButtonSlot.import:
           if (currentImport == Import.prabayarImported) {
@@ -334,6 +277,40 @@ class _MyToggleButtonState extends State<MyToggleButton> with TickerProviderStat
     _animationController.forward();
     _animationControllerPasca.forward();
     _animationControllerPra.forward();
+  }
+
+  void initIsPascaState() async {
+    Import currentImport = await ImportServices.getCurrentImport();
+    switch (widget.toggleButtonSlot) {
+      case ToggleButtonSlot.import:
+        _isPasca = _getIspasca(context, currentImport, widget.toggleButtonSlot);
+        break;
+      case ToggleButtonSlot.export:
+        _isPasca = _getIspasca(context, currentImport, widget.toggleButtonSlot);
+        break;
+      case ToggleButtonSlot.showData:
+        if (currentImport == Import.prabayarImported) {
+          _isPasca = false;
+          ToggleButtonServices.saveShowData(_isPasca);
+        } else {
+          _isPasca = await ToggleButtonServices.getShowData();
+        }
+        break;
+      case ToggleButtonSlot.inputData:
+        if (currentImport == Import.prabayarImported) {
+          _isPasca = false;
+          ToggleButtonServices.saveInputData(_isPasca);
+        } else {
+          _isPasca = await ToggleButtonServices.getInputData();
+        }
+        break;
+    }
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      if (!_isPasca) {
+        _animatePrabayar(context);
+        widget.onTap(_isPasca);
+      }
+    });
   }
 }
 

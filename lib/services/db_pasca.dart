@@ -117,7 +117,8 @@ class DbPasca {
       Database? db = await this.database;
       var mapList = await db!.query(
         tablePascabayar,
-        where: column == null ? '''
+        where: column == null
+            ? '''
           $columnIdPel LIKE ? OR
           $columnNama LIKE ? OR
           $columnAlamat LIKE ? OR
@@ -128,18 +129,18 @@ class DbPasca {
           $columnNpwp LIKE ? OR
           $columnEmail LIKE ? OR
           $columnCatatan LIKE ?
-        ''' : '$column LIKE ?',
+        '''
+            : '$column LIKE ?',
         whereArgs: List.generate(column == null ? 10 : 1, (index) => '%$query%'),
         distinct: false,
       );
 
       List<Pdil> listPdils = [];
-      mapList.forEach((mapPdil) { 
+      mapList.forEach((mapPdil) {
         listPdils.add(Pdil.fromMap(mapPdil));
       });
       return listPdils;
     }
-    
     var pdilMapList = await select();
     List<Pdil> pdilList = [];
     for (int i = 0; i < pdilMapList!.length; i++) {

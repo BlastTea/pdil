@@ -18,3 +18,5 @@ class ChangeCurrentToggleButtonState extends ToggleButtonEvent {
     required this.isPasca,
   });
 }
+
+class ToggleButtonInit extends ToggleButtonEvent {}

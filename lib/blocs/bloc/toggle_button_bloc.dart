@@ -30,11 +30,15 @@ class ToggleButtonBloc extends Bloc<ToggleButtonEvent, ToggleButtonState> {
           );
           break;
       }
+      yield ToggleButtonInitial();
     } else if (event is ChangeCurrentToggleButtonState) {
       yield ChangedCurrentToggleButtonState(
         toggleButtonSlot: event.toggleButtonSlot,
         isPasca: event.isPasca,
       );
+      yield ToggleButtonInitial();
+    } else if (event is ToggleButtonInit) {
+      yield ToggleButtonInitial();
     }
   }
 }

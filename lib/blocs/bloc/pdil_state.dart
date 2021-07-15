@@ -6,6 +6,8 @@ abstract class PdilState {}
 class PdilInitial extends PdilState {}
 
 class PdilLoaded extends PdilState {
+  final Pdil? previousCurrentPdilPasca;
+  final Pdil? previousCurrentPdilPra;
   final Pdil? originalPdilPasca;
   final Pdil? currentPdilPasca;
   final Pdil? originalPdilPra;
@@ -15,12 +17,18 @@ class PdilLoaded extends PdilState {
   final bool isPasca;
   final bool isClearState;
   final bool? isIdpel;
+  final bool isPascaDiff;
+  final bool isPraDiff;
 
   PdilLoaded({
+    required this.previousCurrentPdilPasca,
+    required this.previousCurrentPdilPra,
     required this.originalPdilPasca,
     required this.currentPdilPasca,
     required this.originalPdilPra,
     required this.currentPdilPra,
+    required this.isPascaDiff,
+    required this.isPraDiff,
     this.isFromCustomerData = false,
     this.isContinuingSearch = false,
     required this.isPasca,
@@ -40,7 +48,7 @@ class PdilOnUpdate extends PdilState {
   final int count;
   final bool isUsingSaveDialog;
 
-  PdilOnUpdate(this.count, this.isUsingSaveDialog);
+  PdilOnUpdate({required this.count, required this.isUsingSaveDialog});
 }
 
 class PdilClearedState extends PdilState {

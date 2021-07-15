@@ -18,3 +18,9 @@ class FetchCustomerData extends CustomerDataEvent {
 class UpdateCustomerDataPasca extends CustomerDataEvent {}
 
 class UpdateCustomerDataPra extends CustomerDataEvent {}
+
+class UpdateIsExpandNull extends CustomerDataEvent {
+  final bool isSetIsExpandNull;
+
+  UpdateIsExpandNull({required this.isSetIsExpandNull});
+}

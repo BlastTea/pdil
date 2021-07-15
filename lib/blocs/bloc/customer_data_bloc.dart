@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:pdil/blocs/blocs.dart';
 import 'package:pdil/models/models.dart';
 import 'package:pdil/services/services.dart';
 import 'package:sqflite/sqflite.dart';
@@ -28,7 +29,7 @@ class CustomerDataBloc extends Bloc<CustomerDataEvent, CustomerDataState> {
             pdilPra: pdilPra,
             searchResult: event.searchQuery,
             column: event.column,
-            isSetIxExpandNull: event.isSetIsExpandNull,
+            isSetIsExpandNull: event.isSetIsExpandNull,
           );
         } else {
           pdilPasca = await dbPasca.getPdilList(query: event.searchQuery);
@@ -37,7 +38,7 @@ class CustomerDataBloc extends Bloc<CustomerDataEvent, CustomerDataState> {
             pdilPasca: pdilPasca,
             pdilPra: pdilPra,
             searchResult: event.searchQuery,
-            isSetIxExpandNull: event.isSetIsExpandNull,
+            isSetIsExpandNull: event.isSetIsExpandNull,
           );
         }
       } else {
@@ -46,7 +47,7 @@ class CustomerDataBloc extends Bloc<CustomerDataEvent, CustomerDataState> {
         yield CustomerDataResult(
           pdilPasca: pdilPasca,
           pdilPra: pdilPra,
-          isSetIxExpandNull: event.isSetIsExpandNull,
+          isSetIsExpandNull: event.isSetIsExpandNull,
         );
       }
     } else if (event is UpdateCustomerDataPasca) {
@@ -55,6 +56,12 @@ class CustomerDataBloc extends Bloc<CustomerDataEvent, CustomerDataState> {
     } else if (event is UpdateCustomerDataPra) {
       pdilPra = await dbPra.getPdilList();
       yield CustomerDataResult(pdilPasca: pdilPasca, pdilPra: pdilPra);
+    } else if (event is UpdateIsExpandNull) {
+      yield CustomerDataResult(
+        pdilPasca: pdilPasca,
+        pdilPra: pdilPra,
+        isSetIsExpandNull: event.isSetIsExpandNull,
+      );
     }
   }
 }

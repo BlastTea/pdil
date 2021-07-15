@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
+import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';

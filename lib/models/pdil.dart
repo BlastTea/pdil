@@ -114,7 +114,7 @@ class Pdil {
 
   /// return true jika semua field atau atribut sama,
   /// jika tidak sama maka akan return false
-  bool compareTo(Pdil? pdil, {bool isIgnoreIdpel = true}) {
+  bool isSame(Pdil? pdil, {bool isIgnoreIdpel = true}) {
     if (!isIgnoreIdpel && idPel != pdil!.idPel) {
       return false;
     } else if (noMeter != pdil!.noMeter) {
@@ -144,6 +144,6 @@ class Pdil {
 
   @override
   String toString() {
-    return 'Pdil(idPel : $idPel, noMeter : $noMeter, nama : $nama, alamat : $alamat, tarif : $tarip, daya : $daya, noHp : $noHp, nik : $nik, npwp : $npwp, email : $email, catatan : $catatan, tanggalBaca : $tanggalBaca, isKoreksi : $isKoreksi)';
+    return 'Pdil($idPel, $noMeter, $nama, $alamat, $tarip, $daya, $noHp, $nik, $npwp, $email, $catatan, $tanggalBaca, $isKoreksi)';
   }
 }

@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
+import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdil/services/navigation_helper.dart';
 import 'package:pdil/services/services.dart';
+import 'package:path/path.dart';
 
 import 'import_bloc.dart';
 
@@ -16,15 +21,25 @@ class ExportDataBloc extends Bloc<ExportDataEvent, ExportDataState> {
   @override
   Stream<ExportDataState> mapEventToState(ExportDataEvent event) async* {
     if (event is ExportDataExport) {
-      double persentase = event.row / event.maxRow;
+      double persentase = event.persentase;
       if (persentase == 1.0) {
+        List<Directory>? listDirectory = await getExternalStorageDirectories(type: StorageDirectory.downloads);
+        var data = event.excel.save();
+        File(join(listDirectory![0].path + '/${event.namaFile}.xlsx'))
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(data!);
         NavigationHelper.back();
         NavigationHelper.back();
         if (event.isExport) {
           BlocProvider.of<ImportBloc>(event.context).add(ImportConfirm(await _getImportBloc(isExportBoth: event.isExportBoth, isPasca: event.isPasca), isFromExportPage: true));
+          if (event.isExportBoth) {
+            Future.delayed(const Duration(milliseconds: 1000)).then((value) {
+              NavigationHelper.back();
+            });
+          }
         }
       }
-      yield ExportDataProgress(persentase, event.message);
+      yield ExportDataProgress(progress: persentase, message: event.message, isExport: event.isExport, isExportBoth: event.isExportBoth, isPasca: event.isPasca);
     } else if (event is ExportDataInit) {
       yield ExportDataInitial();
     }

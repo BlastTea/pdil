@@ -16,8 +16,8 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
   Pdil? _originalPdilPra;
 
   bool _isPasca = true;
-  bool _isChangeTextController = false;
   bool _isIgnorePdilLoaded = false;
+  bool _isShowDialogInit = true;
 
   Stopwatch _stopwatchProgress = Stopwatch();
 
@@ -40,12 +40,6 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    if (_isChangeTextController) {
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        _changeTextController(context);
-      });
-      _isChangeTextController = false;
-    }
     return _secondVersion(context);
   }
 
@@ -62,9 +56,6 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
               } else if (statePdil is PdilOnUpdate) {
                 if (statePdil.count > 0) {
                   Fluttertoast.showToast(msg: 'Data Berhasil Disimpan');
-                  _controllers.forEach((controller) {
-                    controller.text = '';
-                  });
                   if (_isPasca) {
                     context.read<CustomerDataBloc>().add(UpdateCustomerDataPasca());
                   } else if (!_isPasca) {
@@ -87,11 +78,11 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
                   if (_isPasca) {
                     _originalPdilPasca = null;
                     _currentPdilPasca = null;
-                    _isChangeTextController = true;
+                    _changeTextController(context);
                   } else if (!_isPasca) {
                     _originalPdilPra = null;
                     _currentPdilPra = null;
-                    _isChangeTextController = true;
+                    _changeTextController(context);
                   }
                   context.read<PdilBloc>().add(ClearPdilState(isPasca: _isPasca));
                 }
@@ -106,7 +97,7 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
                         onTap: (isPasca) {
                           setState(() {
                             _isPasca = isPasca;
-                            _isChangeTextController = true;
+                            _changeTextController(context);
                             _isIgnorePdilLoaded = true;
                           });
                         },
@@ -118,18 +109,32 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
                           child: BlocBuilder<PdilBloc, PdilState>(
                             builder: (_, pdilState) {
                               if (pdilState is PdilLoaded && !_isIgnorePdilLoaded) {
-                                WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+                                WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
                                   // set data ke currentTextField
                                   if (pdilState.isPasca) {
                                     if (pdilState.isFromCustomerData) {
-                                      if (_isPasca) {
-                                        _controllers[0].text = pdilState.originalPdilPasca!.idPel!.substring(5);
-                                      }
-                                      _originalPdilPasca = pdilState.originalPdilPasca?.copyWith();
-                                      _currentPdilPasca = pdilState.currentPdilPasca?.copyWith();
+                                      if (_isPasca && !pdilState.isPascaDiff && _isShowDialogInit) {
+                                        _isShowDialogInit = false;
+                                        _changeTextControllerWithValue(context: context, data: pdilState.previousCurrentPdilPasca, isPasca: pdilState.isPasca);
+                                        await _dialogSaveChanges(context, stateFontSize, pdilState.previousCurrentPdilPasca).then((value) {
+                                          _originalPdilPasca = pdilState.originalPdilPasca?.copyWith();
+                                          _currentPdilPasca = pdilState.currentPdilPasca?.copyWith();
 
-                                      _originalPdilPra = pdilState.originalPdilPra?.copyWith();
-                                      _currentPdilPra = pdilState.currentPdilPra?.copyWith();
+                                          _originalPdilPra = pdilState.originalPdilPra?.copyWith();
+                                          _currentPdilPra = pdilState.currentPdilPra?.copyWith();
+                                          _changeTextControllerWithValue(context: context, data: pdilState.originalPdilPasca, isPasca: pdilState.isPasca);
+                                        });
+                                      } else {
+                                        if (_isShowDialogInit) {
+                                          _isShowDialogInit = false;
+                                          _originalPdilPasca = pdilState.originalPdilPasca?.copyWith();
+                                          _currentPdilPasca = pdilState.currentPdilPasca?.copyWith();
+
+                                          _originalPdilPra = pdilState.originalPdilPra?.copyWith();
+                                          _currentPdilPra = pdilState.currentPdilPra?.copyWith();
+                                          _changeTextControllerWithValue(context: context, data: pdilState.originalPdilPasca, isPasca: pdilState.isPasca);
+                                        }
+                                      }
                                     } else if (pdilState.isContinuingSearch) {
                                       if (pdilState.isClearState) {
                                         _controllers.forEach((controller) {
@@ -145,29 +150,32 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
 
                                       _originalPdilPra = pdilState.originalPdilPra?.copyWith();
                                       _currentPdilPra = pdilState.currentPdilPra?.copyWith();
-                                    }
-                                    if (_isPasca) {
-                                      _controllers[1].text = pdilState.originalPdilPasca?.nama ?? '';
-                                      _controllers[2].text = pdilState.originalPdilPasca?.alamat ?? '';
-                                      _controllers[3].text = pdilState.originalPdilPasca?.tarip ?? '';
-                                      _controllers[4].text = pdilState.originalPdilPasca?.daya ?? '';
-                                      _controllers[5].text = pdilState.originalPdilPasca?.noHp ?? '';
-                                      _controllers[6].text = pdilState.originalPdilPasca?.nik ?? '';
-                                      _controllers[7].text = pdilState.originalPdilPasca?.npwp ?? '';
-                                      _controllers[8].text = pdilState.originalPdilPasca?.email ?? '';
-                                      _controllers[9].text = pdilState.originalPdilPasca?.catatan ?? '';
+                                      _changeTextControllerWithValue(context: context, data: pdilState.originalPdilPasca, isPasca: pdilState.isPasca);
                                     }
                                   } else {
                                     if (pdilState.isFromCustomerData) {
-                                      if (!_isPasca) {
-                                        _controllers[0].text = pdilState.originalPdilPra!.idPel!.substring(5);
-                                        _controllers[1].text = pdilState.originalPdilPra!.noMeter!;
-                                      }
-                                      _originalPdilPra = pdilState.originalPdilPra?.copyWith();
-                                      _currentPdilPra = pdilState.currentPdilPra?.copyWith();
+                                      if (!_isPasca && !pdilState.isPraDiff && _isShowDialogInit) {
+                                        _isShowDialogInit = false;
+                                        _changeTextControllerWithValue(context: context, data: pdilState.previousCurrentPdilPra, isPasca: pdilState.isPasca);
+                                        await _dialogSaveChanges(context, stateFontSize, pdilState.previousCurrentPdilPra).then((value) {
+                                          _originalPdilPra = pdilState.originalPdilPra?.copyWith();
+                                          _currentPdilPra = pdilState.currentPdilPra?.copyWith();
 
-                                      _originalPdilPasca = pdilState.originalPdilPasca?.copyWith();
-                                      _currentPdilPasca = pdilState.currentPdilPasca?.copyWith();
+                                          _originalPdilPasca = pdilState.originalPdilPasca?.copyWith();
+                                          _currentPdilPasca = pdilState.currentPdilPasca?.copyWith();
+                                          _changeTextControllerWithValue(context: context, data: pdilState.originalPdilPra, isPasca: pdilState.isPasca);
+                                        });
+                                      } else {
+                                        if (_isShowDialogInit) {
+                                          _isShowDialogInit = false;
+                                          _originalPdilPra = pdilState.originalPdilPra?.copyWith();
+                                          _currentPdilPra = pdilState.currentPdilPra?.copyWith();
+
+                                          _originalPdilPasca = pdilState.originalPdilPasca?.copyWith();
+                                          _currentPdilPasca = pdilState.currentPdilPasca?.copyWith();
+                                          _changeTextControllerWithValue(context: context, data: pdilState.originalPdilPra, isPasca: pdilState.isPasca);
+                                        }
+                                      }
                                     } else if (pdilState.isContinuingSearch) {
                                       if (pdilState.isClearState) {
                                         _controllers.forEach((controller) {
@@ -183,24 +191,7 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
 
                                       _originalPdilPra = pdilState.originalPdilPra?.copyWith();
                                       _currentPdilPra = pdilState.currentPdilPra?.copyWith();
-                                    }
-                                    if (!_isPasca) {
-                                      if (pdilState.isIdpel != null) {
-                                        if (pdilState.isIdpel!) {
-                                          _controllers[0].text = pdilState.originalPdilPra?.idPel?.substring(5) ?? '';
-                                        } else {
-                                          _controllers[1].text = pdilState.originalPdilPra?.noMeter ?? '';
-                                        }
-                                      }
-                                      _controllers[2].text = pdilState.originalPdilPra?.nama ?? '';
-                                      _controllers[3].text = pdilState.originalPdilPra?.alamat ?? '';
-                                      _controllers[4].text = pdilState.originalPdilPra?.tarip ?? '';
-                                      _controllers[5].text = pdilState.originalPdilPra?.daya ?? '';
-                                      _controllers[6].text = pdilState.originalPdilPra?.noHp ?? '';
-                                      _controllers[7].text = pdilState.originalPdilPra?.nik ?? '';
-                                      _controllers[8].text = pdilState.originalPdilPra?.npwp ?? '';
-                                      _controllers[9].text = pdilState.originalPdilPra?.email ?? '';
-                                      _controllers[10].text = pdilState.originalPdilPra?.catatan ?? '';
+                                      _changeTextControllerWithValue(context: context, data: pdilState.originalPdilPra, isPasca: pdilState.isPasca);
                                     }
                                   }
                                   _isIgnorePdilLoaded = true;
@@ -208,42 +199,10 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
                               } else if (pdilState is PdilClearedState) {
                               } else if (pdilState is UpdatedPdilController) {
                                 WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-                                  if (pdilState.isPasca && _isPasca) {
-                                    _originalPdilPasca = pdilState.originalPdilPasca;
-                                    _currentPdilPasca = pdilState.currentPdilPasca;
-                                    if (pdilState.currentPdilPasca != null) {
-                                      _controllers[0].text = pdilState.currentPdilPasca!.idPel!.substring(5);
-                                      _controllers[1].text = pdilState.currentPdilPasca!.nama ?? '';
-                                      _controllers[2].text = pdilState.currentPdilPasca!.alamat ?? '';
-                                      _controllers[3].text = pdilState.currentPdilPasca!.tarip ?? '';
-                                      _controllers[4].text = pdilState.currentPdilPasca!.daya ?? '';
-                                      _controllers[5].text = pdilState.currentPdilPasca!.noHp ?? '';
-                                      _controllers[6].text = pdilState.currentPdilPasca!.nik ?? '';
-                                      _controllers[7].text = pdilState.currentPdilPasca!.npwp ?? '';
-                                      _controllers[8].text = pdilState.currentPdilPasca!.email ?? '';
-                                      _controllers[9].text = pdilState.currentPdilPasca!.catatan ?? '';
-                                    }
-                                  } else if (!pdilState.isPasca && !_isPasca) {
-                                    _originalPdilPra = pdilState.originalPdilPra;
-                                    _currentPdilPra = pdilState.currentPdilPra;
-                                    if (pdilState.currentPdilPra != null) {
-                                      _controllers[0].text = pdilState.currentPdilPra!.idPel!.substring(5);
-                                      _controllers[1].text = pdilState.currentPdilPra!.noMeter ?? '';
-                                      _controllers[2].text = pdilState.currentPdilPra!.nama ?? '';
-                                      _controllers[3].text = pdilState.currentPdilPra!.alamat ?? '';
-                                      _controllers[4].text = pdilState.currentPdilPra!.tarip ?? '';
-                                      _controllers[5].text = pdilState.currentPdilPra!.daya ?? '';
-                                      _controllers[6].text = pdilState.currentPdilPra!.noHp ?? '';
-                                      _controllers[7].text = pdilState.currentPdilPra!.nik ?? '';
-                                      _controllers[8].text = pdilState.currentPdilPra!.npwp ?? '';
-                                      _controllers[9].text = pdilState.currentPdilPra!.email ?? '';
-                                      _controllers[10].text = pdilState.currentPdilPra!.catatan ?? '';
-                                    }
-                                  } else {
-                                    _controllers.forEach((controller) {
-                                      controller.text = '';
-                                    });
-                                  }
+                                  _originalPdilPasca = pdilState.originalPdilPasca;
+                                  _currentPdilPasca = pdilState.currentPdilPasca;
+                                  _originalPdilPra = pdilState.originalPdilPra;
+                                  _currentPdilPra = pdilState.currentPdilPra;
                                   _changeTextController(context);
                                 });
                               }
@@ -326,12 +285,10 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
                                                   if (_controllers[index].text != '' && _originalPdilPasca == null) {
                                                     _controllers[index].text = '';
                                                   } else if (_originalPdilPasca != null) {
-                                                    if (_originalPdilPasca!.compareTo(_currentPdilPasca, isIgnoreIdpel: true)) {
-                                                      setState(() {
-                                                        _originalPdilPasca = null;
-                                                        _currentPdilPasca = null;
-                                                        _isChangeTextController = true;
-                                                      });
+                                                    if (_originalPdilPasca!.isSame(_currentPdilPasca, isIgnoreIdpel: true)) {
+                                                      _originalPdilPasca = null;
+                                                      _currentPdilPasca = null;
+                                                      _changeTextController(context);
                                                       context.read<FabBloc>().add(HideFab());
                                                       context.read<PdilBloc>().add(ClearPdilState(isPasca: _isPasca));
                                                     } else {
@@ -342,12 +299,10 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
                                                   if (_controllers[index].text != '' && _originalPdilPra == null) {
                                                     _controllers[index].text = '';
                                                   } else if (_originalPdilPra != null) {
-                                                    if (_originalPdilPra!.compareTo(_currentPdilPra, isIgnoreIdpel: true)) {
-                                                      setState(() {
-                                                        _originalPdilPra = null;
-                                                        _currentPdilPra = null;
-                                                        _isChangeTextController = true;
-                                                      });
+                                                    if (_originalPdilPra!.isSame(_currentPdilPra, isIgnoreIdpel: true)) {
+                                                      _originalPdilPra = null;
+                                                      _currentPdilPra = null;
+                                                      _changeTextController(context);
                                                       context.read<FabBloc>().add(HideFab());
                                                       context.read<PdilBloc>().add(ClearPdilState(isPasca: _isPasca));
                                                     } else {
@@ -381,7 +336,7 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
                                                 break;
                                             }
                                             if (_originalPdilPasca != null && index != 0) {
-                                              if (!_originalPdilPasca!.compareTo(_currentPdilPasca, isIgnoreIdpel: true)) {
+                                              if (!_originalPdilPasca!.isSame(_currentPdilPasca, isIgnoreIdpel: true)) {
                                                 context.read<FabBloc>().add(ShowFab());
                                               } else {
                                                 context.read<FabBloc>().add(HideFab());
@@ -414,7 +369,7 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
                                                 break;
                                             }
                                             if (_originalPdilPra != null && index != 0) {
-                                              if (!_originalPdilPra!.compareTo(_currentPdilPra, isIgnoreIdpel: true)) {
+                                              if (!_originalPdilPra!.isSame(_currentPdilPra, isIgnoreIdpel: true)) {
                                                 context.read<FabBloc>().add(ShowFab());
                                               } else {
                                                 context.read<FabBloc>().add(HideFab());
@@ -449,8 +404,8 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
     );
   }
 
-  _dialogSaveChanges(BuildContext context, FontSizeResult stateFontSize) async {
-    await showDialog(
+  Future<void> _dialogSaveChanges(BuildContext context, FontSizeResult stateFontSize, [Pdil? previousCurrentPdil]) {
+    return showDialog(
       context: context,
       useRootNavigator: true,
       builder: (_) => AlertDialog(
@@ -461,44 +416,63 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
         actions: [
           TextButton(
             onPressed: () {
-              if (_isPasca) {
-                _currentPdilPasca!.tanggalBaca = currentTime();
+              Pdil? currentPdil = previousCurrentPdil;
+              if (currentPdil != null) {
+                currentPdil.tanggalBaca = currentTime();
               } else {
-                _currentPdilPra!.tanggalBaca = currentTime();
+                if (_isPasca) {
+                  _currentPdilPasca!.tanggalBaca = currentTime();
+                } else {
+                  _currentPdilPra!.tanggalBaca = currentTime();
+                }
               }
-              context.read<PdilBloc>().add(UpdatePdil(pdil: _isPasca ? _currentPdilPasca : _currentPdilPra, isUsingSaveDialog: true, isPasca: _isPasca));
+              context.read<PdilBloc>().add(UpdatePdil(
+                    pdil: previousCurrentPdil != null
+                        ? currentPdil
+                        : _isPasca
+                            ? _currentPdilPasca
+                            : _currentPdilPra,
+                    isUsingSaveDialog: true,
+                    isPasca: _isPasca,
+                  ));
               context.read<FabBloc>().add(HideFab());
-              context.read<PdilBloc>().add(ClearPdilState(isPasca: _isPasca));
-              setState(() {
+              if (currentPdil == null) {
+                context.read<PdilBloc>().add(ClearPdilState(isPasca: _isPasca));
                 if (_isPasca) {
                   _originalPdilPasca = null;
                   _currentPdilPasca = null;
-                  _isChangeTextController = true;
+                  // _isChangeTextController = true;
+                  _changeTextController(context);
                 } else if (!_isPasca) {
                   _originalPdilPra = null;
                   _currentPdilPra = null;
-                  _isChangeTextController = true;
+                  _changeTextController(context);
+                  // _isChangeTextController = true;
                 }
-              });
+              } else {
+                _changeTextController(context);
+              }
               NavigationHelper.back();
             },
             child: Text('Simpan', style: stateFontSize.body1),
           ),
           TextButton(
             onPressed: () {
-              setState(() {
+              context.read<FabBloc>().add(HideFab());
+              if (previousCurrentPdil == null) {
+                context.read<PdilBloc>().add(ClearPdilState(isPasca: _isPasca));
                 if (_isPasca) {
                   _originalPdilPasca = null;
                   _currentPdilPasca = null;
-                  _isChangeTextController = true;
+                  _changeTextController(context);
                 } else if (!_isPasca) {
                   _originalPdilPra = null;
                   _currentPdilPra = null;
-                  _isChangeTextController = true;
+                  _changeTextController(context);
                 }
-              });
-              context.read<FabBloc>().add(HideFab());
-              context.read<PdilBloc>().add(ClearPdilState(isPasca: _isPasca));
+              } else {
+                _changeTextController(context);
+              }
               NavigationHelper.back();
             },
             child: Text('Buang', style: stateFontSize.body1),
@@ -527,7 +501,7 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
         });
       }
       if (_originalPdilPasca != null) {
-        if (!_originalPdilPasca!.compareTo(_currentPdilPasca, isIgnoreIdpel: true)) {
+        if (!_originalPdilPasca!.isSame(_currentPdilPasca, isIgnoreIdpel: true)) {
           context.read<FabBloc>().add(ShowFab());
         } else {
           context.read<FabBloc>().add(HideFab());
@@ -554,7 +528,7 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
         });
       }
       if (_originalPdilPra != null) {
-        if (!_originalPdilPra!.compareTo(_currentPdilPra, isIgnoreIdpel: true)) {
+        if (!_originalPdilPra!.isSame(_currentPdilPra, isIgnoreIdpel: true)) {
           context.read<FabBloc>().add(ShowFab());
         } else {
           context.read<FabBloc>().add(HideFab());
@@ -570,6 +544,35 @@ class _InputPageState extends State<InputPage> with SingleTickerProviderStateMix
       return index == 0;
     }
     return index == 0 || index == 1;
+  }
+
+  _changeTextControllerWithValue({
+    required BuildContext context,
+    required Pdil? data,
+    required bool isPasca,
+    bool? isIdPel,
+  }) {
+    if (_isPasca) {
+      _controllers[0].text = data?.idPel?.substring(5) ?? '';
+    } else if (!isPasca) {
+      if (isIdPel ?? false) {
+        _controllers[0].text = data?.idPel?.substring(5) ?? '';
+      } else if (isIdPel == false) {
+        _controllers[1].text = data?.noMeter ?? '';
+      } else {
+        _controllers[0].text = data?.idPel?.substring(5) ?? '';
+        _controllers[1].text = data?.noMeter ?? '';
+      }
+    }
+    _controllers[isPasca ? 1 : 2].text = data?.nama ?? '';
+    _controllers[isPasca ? 2 : 3].text = data?.alamat ?? '';
+    _controllers[isPasca ? 3 : 4].text = data?.tarip ?? '';
+    _controllers[isPasca ? 4 : 5].text = data?.daya ?? '';
+    _controllers[isPasca ? 5 : 6].text = data?.noHp ?? '';
+    _controllers[isPasca ? 6 : 7].text = data?.nik ?? '';
+    _controllers[isPasca ? 7 : 8].text = data?.npwp ?? '';
+    _controllers[isPasca ? 8 : 9].text = data?.email ?? '';
+    _controllers[isPasca ? 9 : 10].text = data?.catatan ?? '';
   }
 }
 
