@@ -59,6 +59,7 @@ const String columnEmail = 'Email';
 const String columnCatatan = 'Catatan';
 const String columnIsKoreksi = 'Koreksi';
 const String columnTanggalBaca = 'TanggalBaca';
+const String columnImage = 'Image';
 
 const double defaultPadding = 25.0;
 

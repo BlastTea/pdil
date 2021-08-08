@@ -24,3 +24,10 @@ class UpdateIsExpandNull extends CustomerDataEvent {
 
   UpdateIsExpandNull({required this.isSetIsExpandNull});
 }
+
+class UpdateImageToDatabase extends CustomerDataEvent {
+  final bool isPasca;
+  final Pdil data;
+
+  UpdateImageToDatabase({required this.isPasca, required this.data});
+}

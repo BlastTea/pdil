@@ -22,7 +22,11 @@ static DbPra? _dbPra;
       await Directory(databasePath).create(recursive: true);
       await File(path).create(recursive: true);
     } catch (_) {}
-    var todoDatabase = openDatabase('pdilPra.db', version: 1, onCreate: _createDb);
+    var todoDatabase = openDatabase('pdilPra.db', version: 2, onCreate: _createDb, onUpgrade: (db, oldVersion, newVersion) {
+      if (oldVersion == 1) {
+        db.execute("ALTER TABLE $tablePrabayar ADD $columnImage TEXT NULL DEFAULT 'kosong'");
+      }
+    });
     return todoDatabase;
   }
 
@@ -41,7 +45,8 @@ static DbPra? _dbPra;
         $columnEmail TEXT,
         $columnCatatan TEXT,
         $columnIsKoreksi INTEGER,
-        $columnTanggalBaca TEXT
+        $columnTanggalBaca TEXT,
+        $columnImage TEXT NULL DEFAULT 'kosong'
       )
     ''');
   }

@@ -46,6 +46,20 @@ class _SettingsPageState extends State<SettingsPage> {
                       return Container();
                     },
                   ),
+                  // FutureBuilder<List<Directory>?>(
+                  //   future: getExternalStorageDirectories(type: StorageDirectory.downloads),
+                  //   builder: (_, snapshot) {
+                  //     if (snapshot.hasData) {
+                  //       return Column(
+                  //         children: [
+                  //           _divider(_),
+                  //           _listShareFile(context, stateFontSize, snapshot.data![0].path),
+                  //         ],
+                  //       );
+                  //     }
+                  //     return Container();
+                  //   },
+                  // ),
                 ],
               );
             },
@@ -191,6 +205,29 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           );
+        },
+      );
+
+  _listShareFile(BuildContext context, FontSizeResult stateFontSize, String path) => ListTile(
+        leading: Stack(
+          children: [
+            Icon(
+              Icons.folder,
+              size: 30,
+            ),
+          ],
+        ),
+        title: Text(
+          'Share File',
+          style: stateFontSize.subtitle?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        onTap: () async {
+          MethodChannel platform = const MethodChannel("BlastTea.example.pdil");
+          try {
+            await platform.invokeMethod("openFolder",{"initPath" : path});
+          } on PlatformException catch (ex) {
+            print("${ex.code} : ${ex.message}");
+          }
         },
       );
 }

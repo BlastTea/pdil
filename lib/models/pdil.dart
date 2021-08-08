@@ -14,6 +14,7 @@ class Pdil {
   String? catatan;
   bool? isKoreksi;
   String? tanggalBaca;
+  String? image;
 
   Pdil({
     this.idPel,
@@ -29,6 +30,7 @@ class Pdil {
     this.catatan,
     this.isKoreksi,
     this.tanggalBaca,
+    this.image = "kosong",
   });
 
   Map<String, dynamic> toMap() {
@@ -46,6 +48,7 @@ class Pdil {
       columnCatatan: catatan,
       columnIsKoreksi: isKoreksi == true ? 1 : 0,
       columnTanggalBaca: tanggalBaca,
+      columnImage: image,
     };
     return map;
   }
@@ -64,6 +67,7 @@ class Pdil {
     catatan = map[columnCatatan];
     isKoreksi = map[columnIsKoreksi] == 1;
     tanggalBaca = map[columnTanggalBaca];
+    image = map[columnImage];
   }
 
   List<String?> toList({bool isPasca = true}) => [
@@ -95,6 +99,7 @@ class Pdil {
     String? catatan,
     bool? isKoreksi,
     String? tanggalBaca,
+    String? image,
   }) =>
       Pdil(
         idPel: idPel ?? this.idPel,
@@ -110,6 +115,7 @@ class Pdil {
         catatan: catatan ?? this.catatan,
         isKoreksi: isKoreksi ?? this.isKoreksi,
         tanggalBaca: tanggalBaca ?? this.tanggalBaca,
+        image: image ?? this.image,
       );
 
   /// return true jika semua field atau atribut sama,
@@ -144,6 +150,6 @@ class Pdil {
 
   @override
   String toString() {
-    return 'Pdil($idPel, $noMeter, $nama, $alamat, $tarip, $daya, $noHp, $nik, $npwp, $email, $catatan, $tanggalBaca, $isKoreksi)';
+    return 'Pdil($idPel, $noMeter, $nama, $alamat, $tarip, $daya, $noHp, $nik, $npwp, $email, $catatan, $tanggalBaca, $isKoreksi, $image)';
   }
 }

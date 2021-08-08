@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:meta/meta.dart';
 import 'package:pdil/blocs/blocs.dart';
 import 'package:pdil/models/models.dart';
+import 'package:pdil/services/navigation_helper.dart';
 import 'package:pdil/services/services.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -62,6 +66,25 @@ class CustomerDataBloc extends Bloc<CustomerDataEvent, CustomerDataState> {
         pdilPra: pdilPra,
         isSetIsExpandNull: event.isSetIsExpandNull,
       );
+    } else if (event is UpdateImageToDatabase) {
+      int count = 0;
+      if (event.isPasca) {
+        count = await dbPasca.update(event.data);
+        pdilPasca = await dbPasca.getPdilList();
+      } else {
+        count = await dbPra.update(event.data);
+        pdilPra = await dbPra.getPdilList();
+      }
+      if (count > 0) {
+        File imageFile = File(event.data.image!);
+        var entity = await imageFile.delete();
+        Fluttertoast.showToast(msg: 'Berhasil Diganti');
+        NavigationHelper.back();
+        NavigationHelper.back();
+        yield CustomerDataResult(pdilPasca: pdilPasca, pdilPra: pdilPra);
+      } else {
+        Fluttertoast.showToast(msg: 'Gagal Diganti');
+      }
     }
   }
 }
